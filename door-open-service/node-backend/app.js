@@ -1,6 +1,7 @@
 var StringDecoder = require('string_decoder').StringDecoder;
-
 var decoder = new StringDecoder('utf8');
+var sqlite3 = require('sqlite3').verbose();
+var histogram = require('ascii-histogram');
 net = require('net');
 
 var clients = [];
@@ -71,6 +72,7 @@ var request = require('request');
 var RtmClient = require('@slack/client').RtmClient;
 var RTM_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.RTM;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
+var STATS_DATABASE = "stats.db";
 var token = '<SLACK_TOKEN>';
 var doorbot = '<DOOR_BOT_ID>';
 var channel = '<CHANNEL_ID>';
@@ -82,25 +84,68 @@ function getUserId(userId, userInfoCb) {
   web.users.info(userId, userInfoCb);
 }
 
+var db = new sqlite3.Database(STATS_DATABASE);
+db.serialize(function() {
+  db.run("CREATE TABLE IF NOT EXISTS door_opens(id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, email TEXT, timestamp TEXT DEFAULT CURRENT_TIMESTAMP);");
+});
+var days_of_week = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
 var rtm = new RtmClient(token, {logLevel: 'debug'});
 rtm.start();
 
 rtm.on(RTM_CLIENT_EVENTS.RTM_CONNECTION_OPENED, function () {
-
   rtm.on(RTM_EVENTS.MESSAGE, function (message) {
     console.log(message);
-    if (message.channel == channel && message.text != null && message.text.match(doorbot) != null && message.text.match(/open/i) != null) {
-      if (clients.length > 0) {
-        getUserId(message.user, function userInfoCb(err, info) {
+    if (message.channel == channel && message.text != null && message.text.match(doorbot) != null) {
+      if (message.text.match(/open/i) != null) {
+        if (clients.length > 0) {
+          getUserId(message.user, function userInfoCb(err, info) {
+            if (err) {
+              console.log('Error:', err);
+            } else {
+              rtm.sendMessage('Opening the door as requested by ' + info.user.name + ' (' + info.user.profile.email + ')...', channel);
+              db.run("INSERT INTO door_opens(user, email) VALUES(?, ?)", info.user.name, info.user.profile.email);
+              broadcast("2500");
+            }
+          });
+        } else {
+          rtm.sendMessage('The remote door opening service is not operational at the moment. Consider dispatching a drone to pick up a human.', channel);
+        }
+      } else if (message.text.match(/stats/i) != null) {
+        db.get("SELECT COUNT(*) as count FROM door_opens", function(err, r1) {
           if (err) {
             console.log('Error:', err);
+          } else if (r1) {
+            db.get("SELECT timestamp FROM door_opens ORDER BY timestamp ASC LIMIT 1", function(err, r2) {
+              if (err) {
+                console.log('Error:', err);
+              } else if (r2) {
+                var msg = 'The remote door opening service was used ' + r1.count + ' time(s) since ' + r2.timestamp + '.';
+                var counts = {};
+                days_of_week.forEach(function(el) { counts[el] = 0; });
+                db.each("SELECT case cast(strftime('%w', timestamp) as integer)\
+                         when 0 then 'Sun'\
+                         when 1 then 'Mon'\
+                         when 2 then 'Tue'\
+                         when 3 then 'Wed'\
+                         when 4 then 'Thu'\
+                         when 5 then 'Fri'\
+                         else 'Sat' end as dayofweek, COUNT(*) as count FROM door_opens GROUP BY dayofweek", function(err, r3) {
+                           counts[r3.dayofweek] = r3.count;
+                         }, function() {
+                           msg += '\nBreakdown by day:';
+                           msg += '\n```';
+                           msg += histogram(counts, { sort: false });
+                           msg += '```';
+                           msg += '\nAssuming that it takes ~40 seconds to open the door and get back, around ' + Math.round((r1.count * 40)/60) + ' minutes have been saved!';
+                           rtm.sendMessage(msg, channel);
+                         });
+              }
+            });
           } else {
-            rtm.sendMessage('Opening the door as requested by ' + info.user.name + ' (' + info.user.profile.email + ')...', channel);
-            broadcast("2500");
+            rtm.sendMessage('There are no available stats for the remote door opening service', channel);
           }
         });
-      } else {
-        rtm.sendMessage('The remote door opening service is not operational at the moment. Consider dispatching a drone to pick up a human.', channel);
       }
     }
   });
