@@ -1,0 +1,19 @@
+{
+  "name": "f2door",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/client": "^2.0.5",
+    "basic-auth-connect": "^1.0.0",
+    "requestify": "^0.1.17",
+    "string_decoder": "^0.10.31",
+    "url": "^0.11.0",
+    "ws": "^1.0.1"
+  }
+}
