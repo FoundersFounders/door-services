@@ -13,16 +13,18 @@ gpio.write(gpio_pin, gpio.LOW)
 
 -- 3. Set-up timer
 function setup_alarm()
-  tmr.alarm(0, 3000, 1, function ()
-    local ip = wifi.sta.getip()
-    if ip then
-      tmr.stop(0)
+  if wifi.sta.getip() then
+    connect_to_sf_service()
+  else
+    configure_wifi()
+    wifi.sta.eventMonReg(wifi.STA_GOTIP, function()
+      wifi.sta.eventMonStop()
       connect_to_sf_service()
-    else
-      configure_wifi()
-    end
-  end)
+    end)
+    wifi.sta.eventMonStart()
+  end
 end
+
 setup_alarm()
 
 function connect_to_sf_service()
