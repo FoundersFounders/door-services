@@ -12,7 +12,7 @@ gpio.mode(gpio_pin, gpio.OUTPUT)
 gpio.write(gpio_pin, gpio.LOW)
 
 -- 3. Set-up timer
-function setup_alarm()
+function setup_wifi()
   if wifi.sta.getip() then
     connect_to_sf_service()
   else
@@ -25,7 +25,7 @@ function setup_alarm()
   end
 end
 
-setup_alarm()
+setup_wifi()
 
 function connect_to_sf_service()
   print("Connecting to backend service...")
@@ -36,7 +36,7 @@ function connect_to_sf_service()
   end)
   sk:connect(8300, "<BACKEND_SERVICE>")
   sk:on("connection", function(sck, c) print('got connection') end)
-  sk:on("disconnection", setup_alarm)
+  sk:on("disconnection", setup_wifi)
 end
 
 -- 4. Handle door relay
