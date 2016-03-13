@@ -16,12 +16,12 @@ function setup_alarm()
   if wifi.sta.getip() then
     connect_to_sf_service()
   else
-    configure_wifi()
     wifi.sta.eventMonReg(wifi.STA_GOTIP, function()
       wifi.sta.eventMonStop()
       connect_to_sf_service()
     end)
     wifi.sta.eventMonStart()
+    configure_wifi()
   end
 end
 

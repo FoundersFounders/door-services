@@ -8,9 +8,6 @@ local BACKEND_SERVICE_URL = "http://<BACKEND_SERVICE_HOST>/api/chat.postMessage"
   "&link_names=1" ..
   "&text=%40here%3a+Someone%20is%20ringing%20the%20door%20bell!"
 
-wifi.setmode(wifi.STATION)
-wifi.sta.config(WIFI_SSID, WIFI_PASSWORD)
-
 wifi.sta.eventMonReg(wifi.STA_GOTIP, function()
   wifi.sta.eventMonStop()
   
@@ -26,3 +23,6 @@ wifi.sta.eventMonReg(wifi.STA_GOTIP, function()
 end)
 
 wifi.sta.eventMonStart()
+
+wifi.setmode(wifi.STATION)
+wifi.sta.config(WIFI_SSID, WIFI_PASSWORD)
