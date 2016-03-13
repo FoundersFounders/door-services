@@ -1,9 +1,13 @@
 -- FoundersFounders Building Door Open
 
+local WIFI_SSID = "<WIFI_SSID>"
+local WIFI_PASSWORD = "<WIFI_PASSWORD>"
+local BACKEND_SERVICE = "<BACKEND_SERVICE>"
+
 -- 1. Connect to wifi
 function configure_wifi()
   wifi.setmode(wifi.STATION)
-  wifi.sta.config("<WIFI_NAME>", "<WIFI_PASSWORD>")
+  wifi.sta.config(WIFI_SSID, WIFI_PASSWORD)
 end
 
 -- 2. Configure GPIO
@@ -32,7 +36,7 @@ function connect_to_sf_service()
     sk:send(open_door(sck, c))
     print(c)
   end)
-  sk:connect(8300, "<BACKEND_SERVICE>")
+  sk:connect(8300, BACKEND_SERVICE)
   sk:on("connection", function(sck, c) print('got connection') end)
   sk:on("disconnection", setup_alarm)
 end
