@@ -69,12 +69,9 @@ bot.on('message', rawData => {
           const savedTime = Math.round(count * 40.0);
           const savedTimeStr = moment.duration(savedTime, 'seconds').humanize();
           const timeStr = moment(stats.since, moment.ISO_8601).fromNow();
-          let msg = 'The remote door opening service was used ' + count + ' time(s) since ' + timeStr + '.';
-          msg += '\nBreakdown by day:';
-          msg += '\n```';
-          msg += histogram(_.omit(stats, 'since'), { sort: false });
-          msg += '```';
-          msg += '\nAssuming that it takes ~40 seconds to open the door and get back, around ' + savedTimeStr + ' have been saved!';
+          const msg = `The remote door opening service was used ${count} time${count > 1 ? 's' : ''} since ${timeStr}.` +
+            `\nBreakdown by day:\n\`\`\`${histogram(_.omit(stats, 'since'), { sort: false })}\`\`\`` +
+            `\nAssuming that it takes ~40 seconds to open the door and get back, around ${savedTimeStr} have been saved!`;
           bot.postMessageToChannel(CHANNEL, msg);
         }).catch(err => {
           console.log(err);
