@@ -93,7 +93,6 @@ var days_of_week = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 var rtm = new RtmClient(token, {logLevel: 'debug'});
 rtm.start();
 
-rtm.on(RTM_CLIENT_EVENTS.RTM_CONNECTION_OPENED, function () {
   rtm.on(RTM_EVENTS.MESSAGE, function (message) {
     console.log(message);
     if (message.channel == channel && message.text != null && message.text.match(doorbot) != null) {
@@ -149,4 +148,3 @@ rtm.on(RTM_CLIENT_EVENTS.RTM_CONNECTION_OPENED, function () {
       }
     }
   });
-});
