@@ -8,22 +8,9 @@ local BACKEND_SERVICE_URL = "http://<BACKEND_SERVICE_HOST>/api/chat.postMessage"
   "&link_names=1" ..
   "&text=%40here%3a+Someone%20is%20ringing%20the%20door%20bell!"
 
-function wait_until(condition, action)
-  local WAIT_TIME = 150
-  tmr.alarm(0, WAIT_TIME, 1, function()
-    if condition() then
-      tmr.stop(0)
-      action()
-    else
-      tmr.start(0)
-    end
-  end)
-end
-
-wifi.setmode(wifi.STATION)
-wifi.sta.config(WIFI_SSID, WIFI_PASSWORD)
-
-wait_until(wifi.sta.getip, function()
+wifi.sta.eventMonReg(wifi.STA_GOTIP, function()
+  wifi.sta.eventMonStop()
+  
   http.post(BACKEND_SERVICE_URL, nil, nil, function(code, data)
     if code < 0 then
       print("HTTP request failed")
@@ -34,3 +21,8 @@ wait_until(wifi.sta.getip, function()
     node.dsleep(0)
   end)
 end)
+
+wifi.sta.eventMonStart()
+
+wifi.setmode(wifi.STATION)
+wifi.sta.config(WIFI_SSID, WIFI_PASSWORD)
