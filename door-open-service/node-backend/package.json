@@ -6,16 +6,26 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FoundersFounders/door-services.git"
+  },
+  "author": "FoundersFounders",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FoundersFounders/door-services/issues"
+  },
+  "homepage": "https://github.com/FoundersFounders/door-services#readme",
   "dependencies": {
-    "ascii-histogram": "1.2.0",
-    "@slack/client": "^2.0.5",
-    "basic-auth-connect": "^1.0.0",
-    "requestify": "^0.1.17",
+    "bars": "github:steel/bars",
+    "bluebird": "^3.3.4",
+    "good": "^6.6.0",
+    "good-console": "^5.3.1",
+    "hapi": "^13.2.1",
+    "moment": "^2.12.0",
+    "sequelize": "^3.19.3",
+    "slackbots": "^0.5.1",
     "sqlite3": "^3.1.1",
-    "string_decoder": "^0.10.31",
-    "url": "^0.11.0",
-    "ws": "^1.0.1"
+    "underscore": "^1.8.3"
   }
 }
