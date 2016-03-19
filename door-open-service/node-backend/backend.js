@@ -60,12 +60,12 @@ exports.getStats = function () {
     })
   };
 
-  return Promise.props(queries)      
+  return Promise.props(queries)
   .then(data => {
     const counts0 = _.object(DAYS_OF_WEEK, _.map(DAYS_OF_WEEK, val => 0));
     const countsDay = _.chain(data.count_per_dayQ).indexBy('dayofweek').mapObject(day => day.count).value();
     const full = _.extendOwn(counts0, countsDay, { since: data.timestampQ ? new Date(data.timestampQ.timestamp).toISOString() : null });
-    
+
     return full;
   });
 };
@@ -83,16 +83,16 @@ exports.openDoor = function(userId, secret, slackBot, bellServer, channel, serve
         name: user.name
       }
     }).value();
-    
+
     if (_.has(users, id)) {
       const user = users[id];
       DoorOpens.create({
         user: user.name,
         email: user.email
       });
-      
+
       bellServer.broadcast('2500');
-      slackBot.postMessageToChannel(channel, 'Opening the door as requested by ' + user.name + ' (' + user.email + ')...');
+      slackBot.postMessageToChannel(channel, 'Opening the door as requested by ' + user.name + ' (' + user.email + ')...', { as_user: 'true' });
 
       return user;
     } else {

@@ -35,19 +35,19 @@ const bot = new SlackBot({
 
 bot.on('message', rawData => {
   console.log('bot: ' + JSON.stringify(rawData));
-  
+
   if (rawData.type !== 'message') {
     return;
   }
-  
+
   const text = rawData.text;
   const channelId = rawData.channel;
   const user = rawData.user;
-  
+
   if (!text || !channelId) {
     return;
   }
-  
+
   Promise.props({
     channel: bot.getChannel(CHANNEL),
     bot: bot.getUser(BOT_NAME)
@@ -57,7 +57,7 @@ bot.on('message', rawData => {
         if (bellServer.available()) {
           backend.openDoor(user, SECRET, bot, bellServer, CHANNEL, SECRET);
         } else {
-          bot.postMessageToChannel(CHANNEL, 'The remote door opening service is not operational at the moment. Consider dispatching a drone to pick up a human.');
+          bot.postMessageToChannel(CHANNEL, 'The remote door opening service is not operational at the moment. Consider dispatching a drone to pick up a human.', { as_user: 'true' });
         }
       } else if (text.match(/stats/i) != null) {
         return backend.getStats().then(stats => {
@@ -72,10 +72,10 @@ bot.on('message', rawData => {
           const msg = `The remote door opening service was used ${count} time${count > 1 ? 's' : ''} since ${timeStr}.` +
             `\nBreakdown by day:\n\`\`\`${histogram(_.omit(stats, 'since'), { sort: false })}\`\`\`` +
             `\nAssuming that it takes ~40 seconds to open the door and get back, around ${savedTimeStr} have been saved!`;
-          bot.postMessageToChannel(CHANNEL, msg);
+          bot.postMessageToChannel(CHANNEL, msg, { as_user: 'true' });
         }).catch(err => {
           console.log(err);
-          bot.postMessageToChannel(CHANNEL, err.message);
+          bot.postMessageToChannel(CHANNEL, err.message, { as_user: 'true' });
         });
       }
     }
