@@ -3,17 +3,18 @@
 const StringDecoder = require('string_decoder').StringDecoder;
 const decoder = new StringDecoder('utf8');
 const net = require('net');
+const _ = require('underscore');
 
 function BellServer(params) {
   this.port = params.port;
-  this.clients = [];
+  this.clients = {};
   
   this.createServer();
 }
 
-BellServer.prototype.available = function() {
-  return this.clients.size != 0;
-}
+BellServer.prototype.available = function(group) {
+  return _.find(this.clients, socketInfo => socketInfo.group == group);
+};
 
 BellServer.prototype.createServer = function() {
   return net.createServer(socket => {
@@ -22,46 +23,45 @@ BellServer.prototype.createServer = function() {
     socket.name = socket.remoteAddress + ':' + socket.remotePort;
 
     // Put this new client in the list
-    this.clients.push(socket);
-    console.log('New connection:');
-    console.log(socket);
+    this.clients[socket.name] = { socket: socket, group: 'door' };
+    console.log('New connection: ' + socket.name);
 
     // Handle incoming messages from clients.
     socket.on('data', data => {
-      console.log(decoder.write(data));
+      const message = decoder.write(data);
+      if(message.startsWith("G|")) {
+        const group = message.substr("G|".length);
+        this.clients[socket.name].group = group;
+        console.log(socket.name + " now belongs to group '" + group + "'");
+      } else {
+        console.log("Message from " + socket.name + ": " + message);
+      }
     });
 
     // Remove the client from the list when it leaves
     socket.on('end', () => {
       console.log('end');
-      const clientIndex = this.clients.indexOf(socket);
-      if (clientIndex != -1) {
-        this.clients.splice(clientIndex, 1);
-      }
+      delete this.clients[socket.name];
     });
 
     socket.on('error', (err) => {
       console.log('Caught flash policy server socket error: ');
       console.log(err.stack);
-      const clientIndex = this.clients.indexOf(socket);
-      if (clientIndex != -1) {
-        this.clients.splice(clientIndex, 1);
-      }
+      delete this.clients[socket.name];
     });
 
     socket.on('close', () => {
       console.log('Caught close.');
-      const clientIndex = this.clients.indexOf(socket);
-      if (clientIndex != -1) {
-        this.clients.splice(clientIndex, 1);
-      }
+      delete this.clients[socket.name];
     });
   }).listen(this.port);
 };
 
 // Send a message to all clients
-BellServer.prototype.broadcast = function(message) {
-  this.clients.forEach(client => client.write(message)); // Don't want to send it to sender
+BellServer.prototype.broadcast = function(group, message) {
+  _.each(this.clients, socketInfo => {
+    if(socketInfo.group == group) socketInfo.socket.write(message);
+  });
   // Log it to the server output too
   process.stdout.write(message);
 };

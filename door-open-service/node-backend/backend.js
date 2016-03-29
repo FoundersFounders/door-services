@@ -70,7 +70,7 @@ exports.getStats = function () {
   });
 };
 
-exports.openDoor = function(userId, secret, slackBot, bellServer, channel, serverSecret) {
+function openStuff(whatStuff, userId, secret, slackBot, bellServer, channel, serverSecret) {
   const postMessageMethod = channel.private ? 'postMessageToGroup' : 'postMessageToChannel';
 
   if (secret != serverSecret) {
@@ -92,13 +92,21 @@ exports.openDoor = function(userId, secret, slackBot, bellServer, channel, serve
         user: user.name,
         email: user.email
       });
-
-      bellServer.broadcast('2500');
-      slackBot[postMessageMethod](channel.name, 'Opening the door as requested by ' + user.name + ' (' + user.email + ')...', { as_user: 'true' });
+      
+      bellServer.broadcast(whatStuff, '2500');
+      slackBot[postMessageMethod](channel.name, 'Opening the ' + whatStuff + ' as requested by ' + user.name + ' (' + user.email + ')...', { as_user: 'true' });
 
       return user;
     } else {
       return null;
     }
   });
+};
+
+exports.openDoor = function(userId, secret, slackBot, bellServer, channel, serverSecret) {
+  openStuff('door', userId, secret, slackBot, bellServer, channel, serverSecret);
+};
+
+exports.openGarage = function(userId, secret, slackBot, bellServer, channel, serverSecret) {
+  openStuff('garage', userId, secret, slackBot, bellServer, channel, serverSecret);
 };

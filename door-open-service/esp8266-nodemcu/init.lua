@@ -3,10 +3,10 @@
 local WIFI_SSID = "<WIFI_SSID>"
 local WIFI_PASSWORD = "<WIFI_PASSWORD>"
 local BACKEND_SERVICE = "<BACKEND_SERVICE>"
+local DOOR_GROUP = "door"
 
 -- 1. Connect to wifi
 function configure_wifi()
-  wifi.setmode(wifi.STATION)
   wifi.sta.config(WIFI_SSID, WIFI_PASSWORD)
 end
 
@@ -17,6 +17,8 @@ gpio.write(gpio_pin, gpio.LOW)
 
 -- 3. Set-up timer
 function setup_wifi()
+  wifi.setmode(wifi.STATION)
+  
   if wifi.sta.getip() then
     connect_to_sf_service()
   else
@@ -39,7 +41,10 @@ function connect_to_sf_service()
     print(c)
   end)
   sk:connect(8300, BACKEND_SERVICE)
-  sk:on("connection", function(sck, c) print('got connection') end)
+  sk:on("connection", function(sck, c)
+    print("got connection")
+    sk:send("G|"..DOOR_GROUP)
+  end)
   sk:on("disconnection", setup_wifi)
 end
 
