@@ -13,7 +13,7 @@ const _ = require('underscore');
 const BellServer = require('./bellServer');
 const backend = require('./backend');
 
-const CHANNEL = '<CHANNEL_NAME>';
+const CHANNEL = { name: '<CHANNEL_NAME>', private: true };
 const SLACK_TOKEN = '<SLACK_TOKEN>';
 const BOT_NAME = '<DOOR_BOT_NAME>';
 const SECRET = 'secret';
@@ -33,31 +33,35 @@ const bot = new SlackBot({
     name: BOT_NAME
 });
 
-bot.on('message', rawData => {
-  console.log('bot: ' + JSON.stringify(rawData));
+const channelInfoPromise = CHANNEL.private ?
+  bot.getGroup(CHANNEL.name) :
+  bot.getChannel(CHANNEL.name);
 
-  if (rawData.type !== 'message') {
-    return;
-  }
+channelInfoPromise.then(channelInfo => {
+  const targetChannelId = channelInfo.id;
+  const postMessageMethod = CHANNEL.private ? 'postMessageToGroup' : 'postMessageToChannel';
 
-  const text = rawData.text;
-  const channelId = rawData.channel;
-  const user = rawData.user;
+  bot.on('message', rawData => {
+    console.log('bot: ' + JSON.stringify(rawData));
 
-  if (!text || !channelId) {
-    return;
-  }
+    if (rawData.type !== 'message') {
+      return;
+    }
 
-  Promise.props({
-    channel: bot.getChannel(CHANNEL),
-    bot: bot.getUser(BOT_NAME)
-  }).then(data => {
-    if (channelId === data.channel.id && text && text.indexOf(bot.self.id) != -1) {
+    const text = rawData.text;
+    const channelId = rawData.channel;
+    const user = rawData.user;
+
+    if (!text || !channelId) {
+      return;
+    }
+
+    if (channelId === targetChannelId && text && text.indexOf(bot.self.id) != -1) {
       if (text.match(/open/i) != null) {
         if (bellServer.available()) {
           backend.openDoor(user, SECRET, bot, bellServer, CHANNEL, SECRET);
         } else {
-          bot.postMessageToChannel(CHANNEL, 'The remote door opening service is not operational at the moment. Consider dispatching a drone to pick up a human.', { as_user: 'true' });
+          postMessage(CHANNEL.name, 'The remote door opening service is not operational at the moment. Consider dispatching a drone to pick up a human.', { as_user: 'true' });
         }
       } else if (text.match(/stats/i) != null) {
         return backend.getStats().then(stats => {
@@ -72,10 +76,10 @@ bot.on('message', rawData => {
           const msg = `The remote door opening service was used ${count} time${count > 1 ? 's' : ''} since ${timeStr}.` +
             `\nBreakdown by day:\n\`\`\`${histogram(_.omit(stats, 'since'), { sort: false })}\`\`\`` +
             `\nAssuming that it takes ~40 seconds to open the door and get back, around ${savedTimeStr} have been saved!`;
-          bot.postMessageToChannel(CHANNEL, msg, { as_user: 'true' });
+          bot[postMessageMethod](CHANNEL.name, msg, { as_user: 'true' });
         }).catch(err => {
           console.log(err);
-          bot.postMessageToChannel(CHANNEL, err.message, { as_user: 'true' });
+          bot[postMessageMethod](CHANNEL.name, err.message, { as_user: 'true' });
         });
       }
     }

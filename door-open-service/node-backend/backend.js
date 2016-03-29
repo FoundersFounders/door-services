@@ -71,6 +71,8 @@ exports.getStats = function () {
 };
 
 exports.openDoor = function(userId, secret, slackBot, bellServer, channel, serverSecret) {
+  const postMessageMethod = channel.private ? 'postMessageToGroup' : 'postMessageToChannel';
+
   if (secret != serverSecret) {
     return Promise.resolve(null);
   }
@@ -92,7 +94,7 @@ exports.openDoor = function(userId, secret, slackBot, bellServer, channel, serve
       });
 
       bellServer.broadcast('2500');
-      slackBot.postMessageToChannel(channel, 'Opening the door as requested by ' + user.name + ' (' + user.email + ')...', { as_user: 'true' });
+      bot[postMessageMethod](channel.name, 'Opening the door as requested by ' + user.name + ' (' + user.email + ')...', { as_user: 'true' });
 
       return user;
     } else {
