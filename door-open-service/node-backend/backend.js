@@ -94,7 +94,7 @@ exports.openDoor = function(userId, secret, slackBot, bellServer, channel, serve
       });
 
       bellServer.broadcast('2500');
-      bot[postMessageMethod](channel.name, 'Opening the door as requested by ' + user.name + ' (' + user.email + ')...', { as_user: 'true' });
+      slackBot[postMessageMethod](channel.name, 'Opening the door as requested by ' + user.name + ' (' + user.email + ')...', { as_user: 'true' });
 
       return user;
     } else {

@@ -61,7 +61,7 @@ channelInfoPromise.then(channelInfo => {
         if (bellServer.available()) {
           backend.openDoor(user, SECRET, bot, bellServer, CHANNEL, SECRET);
         } else {
-          postMessage(CHANNEL.name, 'The remote door opening service is not operational at the moment. Consider dispatching a drone to pick up a human.', { as_user: 'true' });
+          bot[postMessageMethod](CHANNEL.name, 'The remote door opening service is not operational at the moment. Consider dispatching a drone to pick up a human.', { as_user: 'true' });
         }
       } else if (text.match(/stats/i) != null) {
         return backend.getStats().then(stats => {
