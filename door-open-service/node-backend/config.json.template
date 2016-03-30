@@ -10,8 +10,14 @@
   "socketServer": {
     "port": 8300
   },
-  "httpApi": {
-    "port": 3000,
-    "secret": "<UNIQUE_PASSWORD>"
+  "interfaces": {
+    "slack": {
+      "enabled": true
+    },
+    "http": {
+      "enabled": false,
+      "port": 3000,
+      "secret": "<UNIQUE_PASSWORD>"
+    }
   }
 }

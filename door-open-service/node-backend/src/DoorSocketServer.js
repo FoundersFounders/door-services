@@ -5,6 +5,7 @@ import _ from "underscore";
 const decoder = new StringDecoder("utf8");
 
 class DoorSocketServer {
+
   constructor(config) {
     this.port = config.port;
     this.clients = {};

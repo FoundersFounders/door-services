@@ -2,6 +2,7 @@ import SlackBot from "slackbots";
 import _ from "underscore";
 
 class DoorSlackBot {
+
   constructor(config) {
     this.bot = new SlackBot({
       token: config.botToken,
