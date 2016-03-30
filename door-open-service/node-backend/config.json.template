@@ -1,0 +1,17 @@
+{
+  "slack": {
+    "channel": {
+      "name": "<CHANNEL_NAME>",
+      "private": true
+    },
+    "botName": "<BOT_NAME>",
+    "botToken": "<BOT_TOKEN>"
+  },
+  "backend": {
+    "port": 8300
+  },
+  "httpApi": {
+    "port": 3000,
+    "secret": "<UNIQUE_PASSWORD>"
+  }
+}

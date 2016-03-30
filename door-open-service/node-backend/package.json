@@ -2,10 +2,10 @@
   "name": "f2door",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "src/app.js",
   "scripts": {
-    "start": "node -r babel-register app.js",
-    "lint": "eslint --fix *.js",
+    "start": "node -r babel-register src/app.js",
+    "lint": "eslint --fix src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

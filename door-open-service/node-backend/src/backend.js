@@ -1,8 +1,6 @@
-"use strict";
-
-const Sequelize = require("sequelize");
-const _ = require("underscore");
-const Promise = require("bluebird");
+import Sequelize from "sequelize";
+import _ from "underscore";
+import Promise from "bluebird";
 
 const STATS_DATABASE = "stats.db"; // sqlite
 const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -40,7 +38,7 @@ const DoorOpens = sequelize.define("door_opens", {
 
 DoorOpens.sync();
 
-exports.getStats = function () {
+function getStats() {
   const queries = {
     count_per_dayQ: sequelize.query(
       "SELECT case cast(strftime('%w', timestamp) as integer) " +
@@ -68,7 +66,7 @@ exports.getStats = function () {
       since: data.timestampQ ? new Date(data.timestampQ.timestamp).toISOString() : null
     });
   });
-};
+}
 
 function openStuff(whatStuff, userId, secret, slackBot, bellServer, channel, serverSecret) {
   const postMessageMethod = channel.private ? "postMessageToGroup" : "postMessageToChannel";
@@ -104,10 +102,12 @@ function openStuff(whatStuff, userId, secret, slackBot, bellServer, channel, ser
   });
 }
 
-exports.openDoor = function (userId, secret, slackBot, bellServer, channel, serverSecret) {
+function openDoor(userId, secret, slackBot, bellServer, channel, serverSecret) {
   openStuff("door", userId, secret, slackBot, bellServer, channel, serverSecret);
-};
+}
 
-exports.openGarage = function (userId, secret, slackBot, bellServer, channel, serverSecret) {
+function openGarage(userId, secret, slackBot, bellServer, channel, serverSecret) {
   openStuff("garage", userId, secret, slackBot, bellServer, channel, serverSecret);
-};
+}
+
+export default { openDoor, openGarage, getStats };
