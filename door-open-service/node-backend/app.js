@@ -57,17 +57,17 @@ channelInfoPromise.then(channelInfo => {
     }
 
     if (channelId === targetChannelId && text && text.indexOf(bot.self.id) != -1) {
-      if (text.match(/open/i) != null) {
-        if (bellServer.available('door')) {
-          backend.openDoor(user, SECRET, bot, bellServer, CHANNEL, SECRET);
-        } else {
-          bot[postMessageMethod](CHANNEL.name, 'The remote door opening service is not operational at the moment. Consider dispatching a drone to pick up a human.', { as_user: 'true' });
-        }
-      } else if (text.match(/garage/i) != null) {
+      if (text.match(/garage/i) != null) {
         if (bellServer.available('garage')) {
           backend.openGarage(user, SECRET, bot, bellServer, CHANNEL, SECRET);
         } else {
           bot[postMessageMethod](CHANNEL.name, 'The remote garage opening service is not operational at the moment. Consider dispatching a drone to pick up a human.', { as_user: 'true' });
+        }
+      } else if (text.match(/open/i) != null) {
+        if (bellServer.available('door')) {
+          backend.openDoor(user, SECRET, bot, bellServer, CHANNEL, SECRET);
+        } else {
+          bot[postMessageMethod](CHANNEL.name, 'The remote door opening service is not operational at the moment. Consider dispatching a drone to pick up a human.', { as_user: 'true' });
         }
       } else if (text.match(/stats/i) != null) {
         return backend.getStats().then(stats => {
