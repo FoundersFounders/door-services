@@ -4,7 +4,7 @@ import _ from "underscore";
 
 const decoder = new StringDecoder("utf8");
 
-class BellServer {
+class DoorSocketServer {
   constructor(params) {
     this.port = params.port;
     this.clients = {};
@@ -65,4 +65,4 @@ class BellServer {
   }
 }
 
-export default BellServer;
+export default DoorSocketServer;

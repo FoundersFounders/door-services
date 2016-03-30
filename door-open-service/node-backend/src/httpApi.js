@@ -3,7 +3,7 @@ import Good from "good";
 import Hapi from "hapi";
 import Joi from "joi";
 
-export default function (config, bot, bellServer, backend) {
+export default function (config, bot, sockServer, backend) {
   const server = new Hapi.Server();
   server.connection({ port: config.httpApi.port });
 
@@ -33,7 +33,7 @@ export default function (config, bot, bellServer, backend) {
     path: "/open",
     handler: (request, reply) => {
       backend.openDoor(
-        request.payload.id, request.payload.secret, bellServer, config.httpApi.secret).then(user => {
+        request.payload.id, request.payload.secret, sockServer, config.httpApi.secret).then(user => {
           if (!user) {
             reply(Boom.unauthorized());
           } else {

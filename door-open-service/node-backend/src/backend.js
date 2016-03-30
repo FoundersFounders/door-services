@@ -68,20 +68,20 @@ function getStats() {
     });
 }
 
-function openStuff(whatStuff, user, secret, bellServer, serverSecret) {
+function openStuff(whatStuff, user, secret, sockServer, serverSecret) {
   if (secret !== serverSecret) return false;
 
   DoorOpens.create({ user: user.name, email: user.email });
-  bellServer.broadcast(whatStuff, "2500");
+  sockServer.broadcast(whatStuff, "2500");
   return true;
 }
 
-function openDoor(userId, secret, slackBot, bellServer, channel, serverSecret) {
-  return openStuff("door", userId, secret, slackBot, bellServer, channel, serverSecret);
+function openDoor(user, secret, sockServer, serverSecret) {
+  return openStuff("door", user, secret, sockServer, serverSecret);
 }
 
-function openGarage(userId, secret, slackBot, bellServer, channel, serverSecret) {
-  return openStuff("garage", userId, secret, slackBot, bellServer, channel, serverSecret);
+function openGarage(user, secret, sockServer, serverSecret) {
+  return openStuff("garage", user, secret, sockServer, serverSecret);
 }
 
 export default { openDoor, openGarage, getStats };

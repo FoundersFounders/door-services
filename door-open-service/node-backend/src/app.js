@@ -4,13 +4,13 @@ import _ from "underscore";
 import fs from "fs";
 
 import backend from "./backend";
-import BellServer from "./BellServer";
+import DoorSocketServer from "./DoorSocketServer";
 import DoorSlackBot from "./DoorSlackBot";
 import startHttpApi from "./httpApi";
 
 const config = JSON.parse(fs.readFileSync("config.json"));
 
-const bellServer = new BellServer({
+const sockServer = new DoorSocketServer({
   port: config.backend.port
 });
 
@@ -19,8 +19,8 @@ const bot = new DoorSlackBot(config.slack);
 bot.onMessageLike(/garage/i, user => {
   if (!user) {
     bot.postMessage("Unrecognized user.");
-  } if (bellServer.available("garage")) {
-    const res = backend.openGarage(user, config.httpApi.secret, bellServer, config.httpApi.secret);
+  } if (sockServer.available("garage")) {
+    const res = backend.openGarage(user, config.httpApi.secret, sockServer, config.httpApi.secret);
     if (res) bot.postMessage(`Opening the garage as requested by ${user.name} (${user.email})...`);
   } else {
     bot.postMessage("The remote garage opening service is not operational at the moment. " +
@@ -31,8 +31,8 @@ bot.onMessageLike(/garage/i, user => {
 bot.onMessageLike(/open/i, user => {
   if (!user) {
     bot.postMessage("Unrecognized user.");
-  } else if (bellServer.available("door")) {
-    const res = backend.openDoor(user, config.httpApi.secret, bellServer, config.httpApi.secret);
+  } else if (sockServer.available("door")) {
+    const res = backend.openDoor(user, config.httpApi.secret, sockServer, config.httpApi.secret);
     if (res) bot.postMessage(`Opening the door as requested by ${user.name} (${user.email})...`);
   } else {
     bot.postMessage("The remote door opening service is not operational at the moment. " +
@@ -61,4 +61,4 @@ bot.onMessageLike(/stats/i, () => {
   });
 });
 
-startHttpApi(config, bot, bellServer, backend);
+startHttpApi(config, bot, sockServer, backend);
