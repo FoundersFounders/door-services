@@ -22,7 +22,7 @@ bot.onMessageLike(/garage/i, user => {
         "Consider dispatching a drone to pick up a human.");
 
   } else {
-    sockServer.broadcast("garage", "2500");
+    sockServer.broadcast("garage", "5000");
     StatsDatabase.registerGarageOpen(user);
     bot.postMessage(`Opening the garage as requested by ${user.name} (${user.email})...`);
   }
