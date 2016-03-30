@@ -3,7 +3,7 @@
 local WIFI_SSID = "<WIFI_SSID>"
 local WIFI_PASSWORD = "<WIFI_PASSWORD>"
 local BACKEND_SERVICE = "<BACKEND_SERVICE>"
-local DOOR_GROUP = "door"
+local DOOR_GROUP = "door" -- change if not deploying for the front door
 
 -- 1. Connect to wifi
 function configure_wifi()
