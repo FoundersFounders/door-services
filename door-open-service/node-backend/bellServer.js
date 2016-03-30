@@ -12,7 +12,7 @@ function BellServer(params) {
 }
 
 BellServer.prototype.available = function() {
-  return this.clients.size != 0;
+  return this.clients.length > 0;
 }
 
 BellServer.prototype.createServer = function() {
