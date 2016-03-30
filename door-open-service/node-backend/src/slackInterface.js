@@ -4,6 +4,14 @@ import _ from "underscore";
 
 import StatsDatabase from "./StatsDatabase";
 
+/**
+ * Sets up the Slack bot to reply to user requests destined for the door backend sent through the configured Slack
+ * channel.
+ * @param {object} config the Slack interface configuration
+ * @param {DoorSlackBot} slackBot the Slack bot to use for interacting and logging door openings
+ * @param {DoorSocketServer} sockServer the server used to broadcast messages to devices
+ * @returns {undefined}
+ */
 export default function (config, slackBot, sockServer) {
 
   slackBot.onMessageLike(/garage/i, user => {

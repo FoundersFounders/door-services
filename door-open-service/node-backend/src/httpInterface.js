@@ -5,6 +5,13 @@ import Joi from "joi";
 
 import StatsDatabase from "./StatsDatabase";
 
+/**
+ * Opens an HTTP server for users to make requests to the door backend.
+ * @param {object} config the HTTP interface configuration
+ * @param {DoorSlackBot} slackBot the Slack bot to use for logging door openings
+ * @param {DoorSocketServer} sockServer the server used to broadcast messages to devices
+ * @returns {undefined}
+ */
 export default function (config, slackBot, sockServer) {
   const server = new Hapi.Server();
   server.connection({ port: config.port });

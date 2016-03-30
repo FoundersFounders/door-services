@@ -4,6 +4,10 @@ import _ from "underscore";
 
 const decoder = new StringDecoder("utf8");
 
+/**
+ * A server for door opening IoT devices to communicate with this backend. Communication is done via simple sockets.
+ * Devices can opt to register in this server with a specific "group" string that identifies which door they handle.
+ */
 class DoorSocketServer {
 
   constructor(config) {

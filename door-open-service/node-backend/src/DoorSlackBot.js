@@ -1,6 +1,12 @@
 import SlackBot from "slackbots";
 import _ from "underscore";
 
+/**
+ * A representation of the door bot in Slack. It is configured with a specific integration token and a Slack channel
+ * (public or private) and provides the primitives for interacting with Slack. In particular, it provides a way to
+ * add hooks for reacting to user messages, a way to post a message in the configured channel and a way to retrieve
+ * information about an user.
+ */
 class DoorSlackBot {
 
   constructor(config) {

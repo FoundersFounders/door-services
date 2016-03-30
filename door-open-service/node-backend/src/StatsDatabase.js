@@ -38,6 +38,9 @@ const DoorOpens = sequelize.define("door_opens", {
 
 DoorOpens.sync();
 
+/**
+ * An entrypoint for querying and updating the door opening stats database.
+ */
 // TODO: convert static to instance methods and parameterize StatsDatabase instances with DB file and options
 class StatsDatabase {
 
