@@ -3,7 +3,9 @@ import Good from "good";
 import Hapi from "hapi";
 import Joi from "joi";
 
-export default function (config, bot, sockServer, backend) {
+import StatsDatabase from "./StatsDatabase";
+
+export default function (config, bot, sockServer) {
   const server = new Hapi.Server();
   server.connection({ port: config.httpApi.port });
 
@@ -21,9 +23,9 @@ export default function (config, bot, sockServer, backend) {
     method: "GET",
     path: "/stats",
     handler: (request, reply) => {
-      backend.getStats()
-          .then(data => reply(data))
-          .catch(err => { console.log(err); reply(err); });
+      StatsDatabase.getStats()
+        .then(data => reply(data))
+        .catch(err => { console.log(err); reply(err); });
     }
   });
 
@@ -32,14 +34,16 @@ export default function (config, bot, sockServer, backend) {
     method: "POST",
     path: "/open",
     handler: (request, reply) => {
-      backend.openDoor(
-        request.payload.id, request.payload.secret, sockServer, config.httpApi.secret).then(user => {
-          if (!user) {
-            reply(Boom.unauthorized());
-          } else {
-            reply(user);
-          }
-        }).catch(err => { console.log(err); reply(err); });
+      bot.getUserInfo(request.payload.id).then(user => {
+        if (!user || request.payload.secret !== config.httpApi.secret) {
+          reply(Boom.unauthorized());
+          return;
+        }
+        sockServer.broadcast("door", "2500");
+        StatsDatabase.registerDoorOpen(user);
+        bot.postMessage(`Opening the door as requested by ${user.name} (${user.email})...`);
+        reply(user);
+      }).catch(err => { console.log(err); reply(err); });
     },
     config: {
       validate: {
