@@ -1,40 +1,40 @@
-'use strict';
+"use strict";
 
-const Sequelize = require('sequelize');
-const _ = require('underscore');
-const Promise = require('bluebird');
+const Sequelize = require("sequelize");
+const _ = require("underscore");
+const Promise = require("bluebird");
 
-const STATS_DATABASE = 'stats.db'; // sqlite
-const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const STATS_DATABASE = "stats.db"; // sqlite
+const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const sequelize = new Sequelize(null, null, null, {
-  dialect: 'sqlite',
+  dialect: "sqlite",
   storage: STATS_DATABASE
 });
 
-const DoorOpens = sequelize.define('door_opens', {
+const DoorOpens = sequelize.define("door_opens", {
   id: {
     type: Sequelize.INTEGER,
-    field: 'id',
+    field: "id",
     primaryKey: true,
     autoIncrement: true
   },
   user: {
     type: Sequelize.STRING,
-    field: 'user'
+    field: "user"
   },
   email: {
     type: Sequelize.STRING,
-    field: 'email'
+    field: "email"
   },
   timestamp: {
     type: Sequelize.DATE,
-    field: 'timestamp',
+    field: "timestamp",
     defaultValue: Sequelize.NOW
   }
 }, {
   freezeTableName: true,
-  tableName: 'door_opens',
+  tableName: "door_opens",
   timestamps: false
 });
 
@@ -51,39 +51,39 @@ exports.getStats = function () {
       "when 4 then 'Thu' " +
       "when 5 then 'Fri' " +
       "else 'Sat' end as dayofweek, COUNT(timestamp) as count FROM door_opens GROUP BY dayofweek", {
-      type: sequelize.QueryTypes.SELECT
-    }),
+        type: sequelize.QueryTypes.SELECT
+      }),
     timestampQ: DoorOpens.findOne({
-      order: 'timestamp ASC',
+      order: "timestamp ASC",
       limit: 1,
-      attributes: ['timestamp',],
+      attributes: ["timestamp"]
     })
   };
 
   return Promise.props(queries)
   .then(data => {
-    const counts0 = _.object(DAYS_OF_WEEK, _.map(DAYS_OF_WEEK, val => 0));
-    const countsDay = _.chain(data.count_per_dayQ).indexBy('dayofweek').mapObject(day => day.count).value();
-    const full = _.extendOwn(counts0, countsDay, { since: data.timestampQ ? new Date(data.timestampQ.timestamp).toISOString() : null });
-
-    return full;
+    const counts0 = _.object(DAYS_OF_WEEK, _.map(DAYS_OF_WEEK, () => 0));
+    const countsDay = _.chain(data.count_per_dayQ).indexBy("dayofweek").mapObject(day => day.count).value();
+    return _.extendOwn(counts0, countsDay, {
+      since: data.timestampQ ? new Date(data.timestampQ.timestamp).toISOString() : null
+    });
   });
 };
 
 function openStuff(whatStuff, userId, secret, slackBot, bellServer, channel, serverSecret) {
-  const postMessageMethod = channel.private ? 'postMessageToGroup' : 'postMessageToChannel';
+  const postMessageMethod = channel.private ? "postMessageToGroup" : "postMessageToChannel";
 
-  if (secret != serverSecret) {
+  if (secret !== serverSecret) {
     return Promise.resolve(null);
   }
 
   return slackBot.getUsers().then(usersRaw => {
     const id = userId;
-    const users = _.chain(usersRaw.members).indexBy('id').mapObject(user => {
+    const users = _.chain(usersRaw.members).indexBy("id").mapObject(user => {
       return {
-        email: user.profile ? (user.profile.email ? user.profile.email : '') : '',
+        email: user.profile ? (user.profile.email ? user.profile.email : "") : "",
         name: user.name
-      }
+      };
     }).value();
 
     if (_.has(users, id)) {
@@ -92,21 +92,22 @@ function openStuff(whatStuff, userId, secret, slackBot, bellServer, channel, ser
         user: user.name,
         email: user.email
       });
-      
-      bellServer.broadcast(whatStuff, '2500');
-      slackBot[postMessageMethod](channel.name, 'Opening the ' + whatStuff + ' as requested by ' + user.name + ' (' + user.email + ')...', { as_user: 'true' });
+
+      bellServer.broadcast(whatStuff, "2500");
+      slackBot[postMessageMethod](channel.name,
+          `Opening the ${whatStuff} as requested by ${user.name} (${user.email})...`, { as_user: "true" });
 
       return user;
     } else {
       return null;
     }
   });
+}
+
+exports.openDoor = function (userId, secret, slackBot, bellServer, channel, serverSecret) {
+  openStuff("door", userId, secret, slackBot, bellServer, channel, serverSecret);
 };
 
-exports.openDoor = function(userId, secret, slackBot, bellServer, channel, serverSecret) {
-  openStuff('door', userId, secret, slackBot, bellServer, channel, serverSecret);
-};
-
-exports.openGarage = function(userId, secret, slackBot, bellServer, channel, serverSecret) {
-  openStuff('garage', userId, secret, slackBot, bellServer, channel, serverSecret);
+exports.openGarage = function (userId, secret, slackBot, bellServer, channel, serverSecret) {
+  openStuff("garage", userId, secret, slackBot, bellServer, channel, serverSecret);
 };
