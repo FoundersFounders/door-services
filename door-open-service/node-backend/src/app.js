@@ -10,7 +10,7 @@ import StatsDatabase from "./StatsDatabase";
 
 const config = JSON.parse(fs.readFileSync("config.json"));
 
-const sockServer = new DoorSocketServer({ port: config.backend.port });
+const sockServer = new DoorSocketServer(config.socketServer);
 const bot = new DoorSlackBot(config.slack);
 
 bot.onMessageLike(/garage/i, user => {

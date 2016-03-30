@@ -7,7 +7,7 @@
     "botName": "<BOT_NAME>",
     "botToken": "<BOT_TOKEN>"
   },
-  "backend": {
+  "socketServer": {
     "port": 8300
   },
   "httpApi": {
