@@ -1,5 +1,7 @@
 'use strict';
 
+const StringDecoder = require('string_decoder').StringDecoder;
+const decoder = new StringDecoder('utf8');
 const net = require('net');
 
 function BellServer(params) {
