@@ -68,22 +68,12 @@ function getStats() {
     });
 }
 
-function openStuff(whatStuff, userId, secret, slackBot, bellServer, serverSecret) {
-  if (secret !== serverSecret) {
-    return Promise.resolve(null);
-  }
+function openStuff(whatStuff, user, secret, bellServer, serverSecret) {
+  if (secret !== serverSecret) return false;
 
-  return slackBot.getUserInfo(userId).then(user => {
-    if (user == null) return null;
-
-    DoorOpens.create({
-      user: user.name,
-      email: user.email
-    });
-
-    bellServer.broadcast(whatStuff, "2500");
-    return user;
-  });
+  DoorOpens.create({ user: user.name, email: user.email });
+  bellServer.broadcast(whatStuff, "2500");
+  return true;
 }
 
 function openDoor(userId, secret, slackBot, bellServer, channel, serverSecret) {

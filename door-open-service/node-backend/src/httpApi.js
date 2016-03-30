@@ -33,7 +33,7 @@ export default function (config, bot, bellServer, backend) {
     path: "/open",
     handler: (request, reply) => {
       backend.openDoor(
-        request.payload.id, request.payload.secret, bot, bellServer, config.httpApi.secret).then(user => {
+        request.payload.id, request.payload.secret, bellServer, config.httpApi.secret).then(user => {
           if (!user) {
             reply(Boom.unauthorized());
           } else {

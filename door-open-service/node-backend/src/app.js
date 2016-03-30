@@ -16,13 +16,12 @@ const bellServer = new BellServer({
 
 const bot = new DoorSlackBot(config.slack);
 
-bot.onMessageLike(/garage/i, userId => {
-  if (bellServer.available("garage")) {
-    backend.openGarage(userId, config.httpApi.secret, bot, bellServer, config.httpApi.secret)
-      .then(user => {
-        user = user || { name: "<unknown>", email: "<unknown email>" };
-        bot.postMessage(`Opening the garage as requested by ${user.name} (${user.email})...`);
-      });
+bot.onMessageLike(/garage/i, user => {
+  if (!user) {
+    bot.postMessage("Unrecognized user.");
+  } if (bellServer.available("garage")) {
+    const res = backend.openGarage(user, config.httpApi.secret, bellServer, config.httpApi.secret);
+    if (res) bot.postMessage(`Opening the garage as requested by ${user.name} (${user.email})...`);
   } else {
     bot.postMessage("The remote garage opening service is not operational at the moment. " +
         "Consider dispatching a drone to pick up a human.");
@@ -30,12 +29,11 @@ bot.onMessageLike(/garage/i, userId => {
 });
 
 bot.onMessageLike(/open/i, user => {
-  if (bellServer.available("door")) {
-    backend.openDoor(user, config.httpApi.secret, bot, bellServer, config.httpApi.secret)
-      .then(user => {
-        user = user || { name: "<unknown>", email: "<unknown email>" };
-        bot.postMessage(`Opening the garage as requested by ${user.name} (${user.email})...`);
-      });
+  if (!user) {
+    bot.postMessage("Unrecognized user.");
+  } else if (bellServer.available("door")) {
+    const res = backend.openDoor(user, config.httpApi.secret, bellServer, config.httpApi.secret);
+    if (res) bot.postMessage(`Opening the door as requested by ${user.name} (${user.email})...`);
   } else {
     bot.postMessage("The remote door opening service is not operational at the moment. " +
         "Consider dispatching a drone to pick up a human.");

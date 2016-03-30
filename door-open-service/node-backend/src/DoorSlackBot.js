@@ -25,12 +25,13 @@ class DoorSlackBot {
 
         const text = rawData.text;
         const channelId = rawData.channel;
-        const user = rawData.user;
         if (!text || !channelId) return;
 
         if (channelId === this.targetChannelId && text && text.indexOf(this.bot.self.id) !== -1) {
           const match = _.find(this.msgCallbacks, cb => text.match(cb.regex));
-          if (match) match.callback(user, text);
+          if (match) {
+            this.getUserInfo(rawData.user).then(user => match.callback(user, text));
+          }
         }
       }).catch(err => console.error(err));
     });
