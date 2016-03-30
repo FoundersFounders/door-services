@@ -5,9 +5,9 @@ import Joi from "joi";
 
 import StatsDatabase from "./StatsDatabase";
 
-export default function (config, bot, sockServer) {
+export default function (config, slackBot, sockServer) {
   const server = new Hapi.Server();
-  server.connection({ port: config.httpApi.port });
+  server.connection({ port: config.port });
 
   // GET /ping
   server.route({
@@ -34,14 +34,14 @@ export default function (config, bot, sockServer) {
     method: "POST",
     path: "/open",
     handler: (request, reply) => {
-      bot.getUserInfo(request.payload.id).then(user => {
-        if (!user || request.payload.secret !== config.httpApi.secret) {
+      slackBot.getUserInfo(request.payload.id).then(user => {
+        if (!user || request.payload.secret !== config.secret) {
           reply(Boom.unauthorized());
           return;
         }
         sockServer.broadcast("door", "2500");
         StatsDatabase.registerDoorOpen(user);
-        bot.postMessage(`Opening the door as requested by ${user.name} (${user.email})...`);
+        slackBot.postMessage(`Opening the door as requested by ${user.name} (${user.email})...`);
         reply(user);
       }).catch(err => { console.log(err); reply(err); });
     },
