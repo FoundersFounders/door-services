@@ -33,14 +33,13 @@ export default function (config, bot, bellServer, backend) {
     path: "/open",
     handler: (request, reply) => {
       backend.openDoor(
-          request.payload.id, request.payload.secret, bot, bellServer,
-          config.slack.channel, config.httpApi.secret).then(user => {
-            if (!user) {
-              reply(Boom.unauthorized());
-            } else {
-              reply(user);
-            }
-          }).catch(err => { console.log(err); reply(err); });
+        request.payload.id, request.payload.secret, bot, bellServer, config.httpApi.secret).then(user => {
+          if (!user) {
+            reply(Boom.unauthorized());
+          } else {
+            reply(user);
+          }
+        }).catch(err => { console.log(err); reply(err); });
     },
     config: {
       validate: {

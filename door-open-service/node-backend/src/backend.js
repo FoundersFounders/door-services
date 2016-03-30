@@ -59,55 +59,39 @@ function getStats() {
   };
 
   return Promise.props(queries)
-  .then(data => {
-    const counts0 = _.object(DAYS_OF_WEEK, _.map(DAYS_OF_WEEK, () => 0));
-    const countsDay = _.chain(data.count_per_dayQ).indexBy("dayofweek").mapObject(day => day.count).value();
-    return _.extendOwn(counts0, countsDay, {
-      since: data.timestampQ ? new Date(data.timestampQ.timestamp).toISOString() : null
+    .then(data => {
+      const counts0 = _.object(DAYS_OF_WEEK, _.map(DAYS_OF_WEEK, () => 0));
+      const countsDay = _.chain(data.count_per_dayQ).indexBy("dayofweek").mapObject(day => day.count).value();
+      return _.extendOwn(counts0, countsDay, {
+        since: data.timestampQ ? new Date(data.timestampQ.timestamp).toISOString() : null
+      });
     });
-  });
 }
 
-function openStuff(whatStuff, userId, secret, slackBot, bellServer, channel, serverSecret) {
-  const postMessageMethod = channel.private ? "postMessageToGroup" : "postMessageToChannel";
-
+function openStuff(whatStuff, userId, secret, slackBot, bellServer, serverSecret) {
   if (secret !== serverSecret) {
     return Promise.resolve(null);
   }
 
-  return slackBot.getUsers().then(usersRaw => {
-    const id = userId;
-    const users = _.chain(usersRaw.members).indexBy("id").mapObject(user => {
-      return {
-        email: user.profile ? (user.profile.email ? user.profile.email : "") : "",
-        name: user.name
-      };
-    }).value();
+  return slackBot.getUserInfo(userId).then(user => {
+    if (user == null) return null;
 
-    if (_.has(users, id)) {
-      const user = users[id];
-      DoorOpens.create({
-        user: user.name,
-        email: user.email
-      });
+    DoorOpens.create({
+      user: user.name,
+      email: user.email
+    });
 
-      bellServer.broadcast(whatStuff, "2500");
-      slackBot[postMessageMethod](channel.name,
-          `Opening the ${whatStuff} as requested by ${user.name} (${user.email})...`, { as_user: "true" });
-
-      return user;
-    } else {
-      return null;
-    }
+    bellServer.broadcast(whatStuff, "2500");
+    return user;
   });
 }
 
 function openDoor(userId, secret, slackBot, bellServer, channel, serverSecret) {
-  openStuff("door", userId, secret, slackBot, bellServer, channel, serverSecret);
+  return openStuff("door", userId, secret, slackBot, bellServer, channel, serverSecret);
 }
 
 function openGarage(userId, secret, slackBot, bellServer, channel, serverSecret) {
-  openStuff("garage", userId, secret, slackBot, bellServer, channel, serverSecret);
+  return openStuff("garage", userId, secret, slackBot, bellServer, channel, serverSecret);
 }
 
 export default { openDoor, openGarage, getStats };
