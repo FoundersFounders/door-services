@@ -44,18 +44,18 @@ class DoorSocketServer {
 
       // Remove the client from the list when it leaves
       socket.on("end", () => {
-        console.log("end");
+        console.log(`Connection ended: ${socket.name}`);
         delete this.clients[socket.name];
       });
 
       socket.on("error", err => {
-        console.log("Caught flash policy server socket error: ");
-        console.log(err.stack);
+        console.error(`Connection error: ${socket.name}`);
+        console.error(err.stack);
         delete this.clients[socket.name];
       });
 
       socket.on("close", () => {
-        console.log("Caught close.");
+        console.log(`Connection closed: ${socket.name}`);
         delete this.clients[socket.name];
       });
     }).listen(this.port);
