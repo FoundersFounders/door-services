@@ -1,0 +1,5 @@
+language: node_js
+node_js:
+  - 5.0
+script:
+  - cd door-open-service/node-backend && npm install && npm run lint
