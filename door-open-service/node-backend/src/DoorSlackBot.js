@@ -10,12 +10,10 @@ import _ from "underscore";
 class DoorSlackBot {
 
   constructor(config) {
-    this.bot = new SlackBot({
-      token: config.botToken,
-      name: config.botName
-    });
+    this.bot = new SlackBot({ token: config.botToken, name: config.botName });
 
     this.channelName = config.channel.name;
+    this.postMessageMethod = config.channel.private ? "postMessageToGroup" : "postMessageToChannel";
     this.msgCallbacks = [];
 
     const channelInfoPromise = config.channel.private ?
@@ -23,18 +21,13 @@ class DoorSlackBot {
       this.bot.getChannel(config.channel.name);
 
     channelInfoPromise.then(channelInfo => {
-      this.targetChannelId = channelInfo.id;
-      this.postMessageMethod = config.channel.private ? "postMessageToGroup" : "postMessageToChannel";
-
       this.bot.on("message", rawData => {
-        console.log("bot: " + JSON.stringify(rawData));
-        if (rawData.type !== "message") return;
+        console.log(`Slack: ${JSON.stringify(rawData)}`);
 
-        const text = rawData.text;
-        const channelId = rawData.channel;
-        if (!text || !channelId) return;
+        let { type, text, channel } = rawData;
+        if (type !== "message" || !text || !channel) return;
 
-        if (channelId === this.targetChannelId && text && text.indexOf(this.bot.self.id) !== -1) {
+        if (channel === channelInfo.id && text.indexOf(this.bot.self.id) !== -1) {
           const match = _.find(this.msgCallbacks, cb => text.match(cb.regex));
           if (match) {
             this.getUserInfo(rawData.user).then(user => match.callback(user, text));
@@ -59,7 +52,7 @@ class DoorSlackBot {
       if (!user) return null;
       return {
         name: user.name,
-        email: user.profile ? (user.profile.email ? user.profile.email : "") : ""
+        email: user.profile ? (user.profile.email || "") : ""
       };
     });
   }

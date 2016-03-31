@@ -28,7 +28,7 @@ class DoorSocketServer {
 
       // Put this new client in the list
       this.clients[socket.name] = { socket: socket, group: "door" };
-      console.log("New connection: " + socket.name);
+      console.log(`New connection: ${socket.name}`);
 
       // Handle incoming messages from clients.
       socket.on("data", data => {
@@ -36,9 +36,9 @@ class DoorSocketServer {
         if (message.startsWith("G|")) {
           const group = message.substr("G|".length);
           this.clients[socket.name].group = group;
-          console.log(socket.name + " now belongs to group '" + group + "'");
+          console.log(`${socket.name} now belongs to group '${group}'`);
         } else {
-          console.log("Message from " + socket.name + ": " + message);
+          console.log(`Message from ${socket.name}: ${message}`);
         }
       });
 
@@ -48,7 +48,7 @@ class DoorSocketServer {
         delete this.clients[socket.name];
       });
 
-      socket.on("error", (err) => {
+      socket.on("error", err => {
         console.log("Caught flash policy server socket error: ");
         console.log(err.stack);
         delete this.clients[socket.name];
@@ -62,11 +62,12 @@ class DoorSocketServer {
   }
 
   broadcast(group, message) {
-    _.each(this.clients, socketInfo => {
-      if (socketInfo.group === group) socketInfo.socket.write(message);
+    _.each(this.clients, ({ group: socketGroup, socket }) => {
+      if (socketGroup === group) socket.write(message);
     });
+
     // Log it to the server output too
-    console.log(message);
+    console.log(`Broadcast to ${group}: ${message}`);
   }
 }
 

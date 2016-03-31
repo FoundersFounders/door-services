@@ -32,7 +32,7 @@ export default function (config, slackBot, sockServer) {
     handler: (request, reply) => {
       StatsDatabase.getStats()
         .then(data => reply(data))
-        .catch(err => { console.log(err); reply(err); });
+        .catch(err => { console.error(err); reply(err); });
     }
   });
 
@@ -74,16 +74,11 @@ export default function (config, slackBot, sockServer) {
       }]
     }
   }, err => {
-    if (err) {
-      throw err; // something bad happened loading the plugin
-    }
+    if (err) throw err; // something bad happened loading the plugin
 
     server.start((err) => {
-      if (err) {
-        throw err;
-      }
-
-      server.log("info", "Server running at: " + server.info.uri);
+      if (err) throw err;
+      server.log("info", `Server running at: ${server.info.uri}`);
     });
   });
 }
