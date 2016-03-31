@@ -3,3 +3,11 @@ node_js:
   - 5.0
 script:
   - cd door-open-service/node-backend && npm install && npm run lint
+env:
+  - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
