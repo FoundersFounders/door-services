@@ -1,4 +1,7 @@
 node_modules
 typings
 .vscode
-*.db
+npm-debug.log
+
+config.json
+stats.db
