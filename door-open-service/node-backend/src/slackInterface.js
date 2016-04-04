@@ -18,7 +18,7 @@ export default function (config, slackBot, sockServer) {
     if (!user) {
       slackBot.postMessage("Unrecognized user.");
 
-    } if (!sockServer.available("garage")) {
+    } else if (!sockServer.available("garage")) {
       slackBot.postMessage("The remote garage opening service is not operational at the moment. " +
           "Consider dispatching a drone to pick up a human.");
 
@@ -33,7 +33,7 @@ export default function (config, slackBot, sockServer) {
     if (!user) {
       slackBot.postMessage("Unrecognized user.");
 
-    } if (!sockServer.available("door")) {
+    } else if (!sockServer.available("door")) {
       slackBot.postMessage("The remote door opening service is not operational at the moment. " +
           "Consider dispatching a drone to pick up a human.");
 
