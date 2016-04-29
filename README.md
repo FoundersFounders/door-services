@@ -1,6 +1,6 @@
 # Door Services
 
-This project contains the 2 services concerning the FoundersFounders door.
+This project contains the 2 services and mobile app concerning the FoundersFounders door.
 
 ## Doorbell service
 
