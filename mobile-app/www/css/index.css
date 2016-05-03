@@ -36,18 +36,21 @@ body {
     text-align: center;
 }
 
-.company_logo
-{
-    margin-top: 20px;
-    margin-bottom: 20px;
-}
-
 /* Portrait layout (default) */
 .app {
-    height:50px;                   /* text area height */
+    height:20%;                   /* text area height */
     width:100%;                   /* text area width */
     text-align:center;
     margin-top: 15%;
+}
+
+.logo {
+    background-image: url('../img/founders.png');
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: 50%;
 }
 
 /* Landscape layout (with min-width) */
