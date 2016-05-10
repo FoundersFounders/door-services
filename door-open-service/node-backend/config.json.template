@@ -1,10 +1,6 @@
 {
   "slack": {
-    "channel": {
-      "name": "<CHANNEL_NAME>",
-      "private": true
-    },
-    "botName": "<BOT_NAME>",
+    "channel": "<CHANNEL_NAME>",
     "botToken": "<BOT_TOKEN>"
   },
   "socketServer": {
