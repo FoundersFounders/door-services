@@ -55,7 +55,7 @@ export default function (config, slackBot, sockServer) {
         const savedTime = Math.round(count * 40.0);
         const savedTimeStr = moment.duration(savedTime, "seconds").humanize();
         const timeStr = moment(stats.since, moment.ISO_8601).fromNow();
-        var msg = `The remote *${name}* opening service was used ${count} time${count > 1 ? "s" : ""} since ${timeStr}.\n` +
+        let msg = `The remote *${name}* opening service was used ${count} time${count > 1 ? "s" : ""} since ${timeStr}.\n` +
                   `Breakdown by day:\n\`\`\`${histogram(_.omit(stats, "since"), { sort: false })}\`\`\`\n`;
         if (includeSaveTime)
           msg += `Assuming that it takes ~40 seconds to open the ${name} and get back, around ${savedTimeStr} have been saved!`;

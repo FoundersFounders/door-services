@@ -90,7 +90,7 @@ class StatsDatabase {
         });
       });
     }).then(res => {
-      var stats = {};
+      let stats = {};
       _.each(types, (el, idx) => { stats[el] = res[idx]; });
       return stats;
     });
