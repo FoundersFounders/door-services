@@ -76,7 +76,13 @@ class StatsDatabase {
           where: { type: type },
           limit: 1,
           attributes: ["timestamp"]
-        })
+        }),
+        top_usersQ: sequelize.query(
+          "SELECT user, count(*) AS total FROM door_opens WHERE user IS NOT NULL " +
+            `AND type = '${type}' GROUP BY user ORDER BY total DESC LIMIT 10`, {
+              type: sequelize.QueryTypes.SELECT
+            }
+        )
       };
     };
 
@@ -86,9 +92,11 @@ class StatsDatabase {
       return _.map(data, val => {
         const counts0 = _.object(DAYS_OF_WEEK, _.map(DAYS_OF_WEEK, () => 0));
         const countsDay = _.chain(val.count_per_dayQ).indexBy("dayofweek").mapObject(day => day.count).value();
-        return _.extendOwn(counts0, countsDay, {
+        const counts = _.extendOwn(counts0, countsDay, {
           since: val.timestampQ ? new Date(val.timestampQ.timestamp).toISOString() : null
         });
+        const topUsers = _.chain(val.top_usersQ).indexBy("user").mapObject(user => user.total).value();
+        return { "counts": counts, "topUsers": topUsers };
       });
     }).then(res => {
       let stats = {};

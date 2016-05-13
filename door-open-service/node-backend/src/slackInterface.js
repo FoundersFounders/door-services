@@ -51,16 +51,20 @@ export default function (config, slackBot, sockServer) {
       }
 
       const produceMsg = (name, stats, includeSaveTime) => {
-        const count = _.reduce(_.values(_.omit(stats, "since")), (m, val) => m + val, 0);
+        const counts = stats["counts"];
+        const topUsers = stats["topUsers"];
+        const count = _.reduce(_.values(_.omit(counts, "since")), (m, val) => m + val, 0);
         const savedTime = Math.round(count * 40.0);
         const savedTimeStr = moment.duration(savedTime, "seconds").humanize();
-        const timeStr = moment(stats.since, moment.ISO_8601).fromNow();
+        const timeStr = moment(counts.since, moment.ISO_8601).fromNow();
         let msg = `The remote *${name}* opening service was used ` +
                   `${count} time${count > 1 ? "s" : ""} since ${timeStr}.\n` +
-                  `Breakdown by day:\n\`\`\`${histogram(_.omit(stats, "since"), { sort: false })}\`\`\`\n`;
+                  `Breakdown by day:\n\`\`\`${histogram(_.omit(counts, "since"), { sort: false })}\`\`\``;
         if (includeSaveTime)
-          msg += `Assuming that it takes ~40 seconds to open the ${name} and get back, ` +
-                 `around ${savedTimeStr} have been saved!`;
+          msg += `\nAssuming that it takes ~40 seconds to open the ${name} and get back, ` +
+          `around ${savedTimeStr} have been saved!`;
+        if (!_.isEmpty(topUsers))
+          msg += `\nTop remote *${name}* opening users:\n\`\`\`${histogram(topUsers, { sort: true })}\`\`\``;
         return msg;
       };
 
