@@ -1,5 +1,5 @@
 {
-  "slack": {
+  "slackBot": {
     "channel": "<CHANNEL_NAME>",
     "botToken": "<BOT_TOKEN>"
   },
