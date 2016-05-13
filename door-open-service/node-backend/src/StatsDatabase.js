@@ -29,6 +29,10 @@ const DoorOpens = sequelize.define("door_opens", {
     type: Sequelize.DATE,
     field: "timestamp",
     defaultValue: Sequelize.NOW
+  },
+  type: {
+    type: Sequelize.STRING,
+    field: "type"
   }
 }, {
   freezeTableName: true,
@@ -45,41 +49,60 @@ DoorOpens.sync();
 class StatsDatabase {
 
   static registerDoorOpen(user) {
-    DoorOpens.create(user);
+    DoorOpens.create({ user: user.name, email: user.email, type: "door" });
   }
 
-  static registerGarageOpen(/*user*/) {
-    // TODO: register garage openings
+  static registerGarageOpen(user) {
+    DoorOpens.create({ user: user.name, email: user.email, type: "garage" });
   }
 
   static getStats() {
-    const queries = {
-      count_per_dayQ: sequelize.query(
-        "SELECT case cast(strftime('%w', timestamp) as integer) " +
-        "when 0 then 'Sun' " +
-        "when 1 then 'Mon' " +
-        "when 2 then 'Tue' " +
-        "when 3 then 'Wed' " +
-        "when 4 then 'Thu' " +
-        "when 5 then 'Fri' " +
-        "else 'Sat' end as dayofweek, COUNT(timestamp) as count FROM door_opens GROUP BY dayofweek", {
-          type: sequelize.QueryTypes.SELECT
+    const queries = type => {
+      return {
+        count_per_dayQ: sequelize.query(
+          "SELECT case cast(strftime('%w', timestamp) as integer) " +
+            "when 0 then 'Sun' " +
+            "when 1 then 'Mon' " +
+            "when 2 then 'Tue' " +
+            "when 3 then 'Wed' " +
+            "when 4 then 'Thu' " +
+            "when 5 then 'Fri' " +
+            "else 'Sat' end as dayofweek, COUNT(timestamp) as count FROM door_opens " +
+            `WHERE type = '${type}' GROUP BY dayofweek`, {
+              type: sequelize.QueryTypes.SELECT
+            }),
+        timestampQ: DoorOpens.findOne({
+          order: "timestamp ASC",
+          where: { type: type },
+          limit: 1,
+          attributes: ["timestamp"]
         }),
-      timestampQ: DoorOpens.findOne({
-        order: "timestamp ASC",
-        limit: 1,
-        attributes: ["timestamp"]
-      })
+        top_usersQ: sequelize.query(
+          "SELECT user, count(*) AS total FROM door_opens WHERE user IS NOT NULL " +
+            `AND type = '${type}' GROUP BY user ORDER BY total DESC LIMIT 10`, {
+              type: sequelize.QueryTypes.SELECT
+            }
+        )
+      };
     };
 
-    return Promise.props(queries)
-      .then(data => {
+    const types = ["door", "garage"];
+
+    return Promise.all(_.map(types, t => Promise.props(queries(t)))).then(data => {
+      return _.map(data, val => {
         const counts0 = _.object(DAYS_OF_WEEK, _.map(DAYS_OF_WEEK, () => 0));
-        const countsDay = _.chain(data.count_per_dayQ).indexBy("dayofweek").mapObject(day => day.count).value();
-        return _.extendOwn(counts0, countsDay, {
-          since: data.timestampQ ? new Date(data.timestampQ.timestamp).toISOString() : null
+        const countsDay = _.chain(val.count_per_dayQ).indexBy("dayofweek").mapObject(day => day.count).value();
+        const counts = _.extendOwn(counts0, countsDay, {
+          since: val.timestampQ ? new Date(val.timestampQ.timestamp).toISOString() : null
         });
+        const topUsers = _.chain(val.top_usersQ).indexBy("user").mapObject(user => user.total).value();
+        return { "counts": counts, "topUsers": topUsers };
       });
+    }).then(res => {
+      let stats = {};
+      _.each(types, (el, idx) => { stats[el] = res[idx]; });
+      return stats;
+    });
   }
 }
 
