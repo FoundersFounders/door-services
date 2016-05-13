@@ -49,11 +49,11 @@ DoorOpens.sync();
 class StatsDatabase {
 
   static registerDoorOpen(user) {
-    DoorOpens.create({ user: user.name, email: user.email, type: 'door' });
+    DoorOpens.create({ user: user.name, email: user.email, type: "door" });
   }
 
   static registerGarageOpen(user) {
-    DoorOpens.create({ user: user.name, email: user.email, type: 'garage' });
+    DoorOpens.create({ user: user.name, email: user.email, type: "garage" });
   }
 
   static getStats() {
@@ -67,7 +67,8 @@ class StatsDatabase {
             "when 3 then 'Wed' " +
             "when 4 then 'Thu' " +
             "when 5 then 'Fri' " +
-            `else 'Sat' end as dayofweek, COUNT(timestamp) as count FROM door_opens WHERE type = '${type}' GROUP BY dayofweek`, {
+            "else 'Sat' end as dayofweek, COUNT(timestamp) as count FROM door_opens " +
+            `WHERE type = '${type}' GROUP BY dayofweek`, {
               type: sequelize.QueryTypes.SELECT
             }),
         timestampQ: DoorOpens.findOne({
@@ -79,7 +80,7 @@ class StatsDatabase {
       };
     };
 
-    const types = ['door', 'garage'];
+    const types = ["door", "garage"];
 
     return Promise.all(_.map(types, t => Promise.props(queries(t)))).then(data => {
       return _.map(data, val => {
