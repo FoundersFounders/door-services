@@ -50,14 +50,21 @@ export default function (config, slackBot, sockServer) {
         throw new Error("There are no available stats for the remote door opening service");
       }
 
-      const count = _.reduce(_.values(_.omit(stats, "since")), (m, val) => m + val, 0);
-      const savedTime = Math.round(count * 40.0);
-      const savedTimeStr = moment.duration(savedTime, "seconds").humanize();
-      const timeStr = moment(stats.since, moment.ISO_8601).fromNow();
-      const msg =
-          `The remote door opening service was used ${count} time${count > 1 ? "s" : ""} since ${timeStr}.\n` +
-          `Breakdown by day:\n\`\`\`${histogram(_.omit(stats, "since"), { sort: false })}\`\`\`\n` +
-          `Assuming that it takes ~40 seconds to open the door and get back, around ${savedTimeStr} have been saved!`;
+      const produceMsg = (name, stats, includeSaveTime) => {
+        const count = _.chain(stats).omit("since").values().reduce((m, val) => m + val, 0).value();
+        const savedTime = Math.round(count * 40.0);
+        const savedTimeStr = moment.duration(savedTime, "seconds").humanize();
+        const timeStr = moment(stats.since, moment.ISO_8601).fromNow();
+        let msg = `The remote *${name}* opening service was used ` +
+                  `${count} time${count > 1 ? "s" : ""} since ${timeStr}.\n` +
+                  `Breakdown by day:\n\`\`\`${histogram(_.omit(stats, "since"), { sort: false })}\`\`\`\n`;
+        if (includeSaveTime)
+          msg += `Assuming that it takes ~40 seconds to open the ${name} and get back, ` +
+                 `around ${savedTimeStr} have been saved!`;
+        return msg;
+      };
+
+      const msg = produceMsg("door", stats["door"], true) + "\n\n\n" + produceMsg("garage", stats["garage"], false);
       slackBot.postMessage(msg);
     }).catch(err => {
       console.error(err);
