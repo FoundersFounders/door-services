@@ -48,12 +48,12 @@ DoorOpens.sync();
 // TODO: convert static to instance methods and parameterize StatsDatabase instances with DB file and options
 class StatsDatabase {
 
-  static registerDoorOpen(user) {
-    DoorOpens.create({ user: user.name, email: user.email, type: "door" });
+  static registerDoorOpen({ name, email }) {
+    DoorOpens.create({ user: name, email: email, type: "door" });
   }
 
-  static registerGarageOpen(user) {
-    DoorOpens.create({ user: user.name, email: user.email, type: "garage" });
+  static registerGarageOpen({ name, email }) {
+    DoorOpens.create({ user: name, email: email, type: "garage" });
   }
 
   static getStats() {
@@ -73,7 +73,7 @@ class StatsDatabase {
             }),
         timestampQ: DoorOpens.findOne({
           order: "timestamp ASC",
-          where: { type: type },
+          where: { type },
           limit: 1,
           attributes: ["timestamp"]
         })
@@ -82,7 +82,7 @@ class StatsDatabase {
 
     const types = ["door", "garage"];
 
-    return Promise.all(_.map(types, t => Promise.props(queries(t)))).then(data => {
+    return Promise.all(types.map(t => Promise.props(queries(t)))).then(data => {
       return _.map(data, val => {
         const counts0 = _.object(DAYS_OF_WEEK, _.map(DAYS_OF_WEEK, () => 0));
         const countsDay = _.chain(val.count_per_dayQ).indexBy("dayofweek").mapObject(day => day.count).value();
@@ -91,9 +91,7 @@ class StatsDatabase {
         });
       });
     }).then(res => {
-      let stats = {};
-      _.each(types, (el, idx) => { stats[el] = res[idx]; });
-      return stats;
+      return _.object(types, res);
     });
   }
 }

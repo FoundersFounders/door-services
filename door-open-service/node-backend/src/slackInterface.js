@@ -51,7 +51,7 @@ export default function (config, slackBot, sockServer) {
       }
 
       const produceMsg = (name, stats, includeSaveTime) => {
-        const count = _.reduce(_.values(_.omit(stats, "since")), (m, val) => m + val, 0);
+        const count = _.chain(stats).omit("since").values().reduce((m, val) => m + val, 0).value();
         const savedTime = Math.round(count * 40.0);
         const savedTimeStr = moment.duration(savedTime, "seconds").humanize();
         const timeStr = moment(stats.since, moment.ISO_8601).fromNow();
