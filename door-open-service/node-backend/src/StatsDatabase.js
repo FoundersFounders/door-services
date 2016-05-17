@@ -90,9 +90,7 @@ class StatsDatabase {
           since: val.timestampQ ? new Date(val.timestampQ.timestamp).toISOString() : null
         });
       });
-    }).then(res => {
-      return _.object(types, res);
-    });
+    }).then(res => _.object(types, res));
   }
 }
 
