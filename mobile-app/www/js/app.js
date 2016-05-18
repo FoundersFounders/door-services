@@ -5,6 +5,7 @@ var app = {
 
   token: '<TOKEN>',
   username: '<USERNAME>',
+  channel: '<CHANNEL>',
 
   f7: new Framework7({
     material: true
@@ -19,7 +20,12 @@ var app = {
       return;
     }
 
-    var url = 'https://slack.com/api/chat.postMessage?token=' + app.token + '&channel=door&text=@door-service: open&link_names=1&username=' + app.username + '&as_user=true&pretty=1';
+    var url =
+        'https://slack.com/api/chat.postMessage?token=' + app.token +
+        '&channel=' + app.channel +
+        '&text=@door-service: open&link_names=1' +
+        '&username=' + app.username +
+        '&as_user=true&pretty=1';
     app.sendAction(url);
   },
 
@@ -30,7 +36,12 @@ var app = {
       return;
     }
 
-    var url = 'https://slack.com/api/chat.postMessage?token=' + app.token + '&channel=door&text=@door-service: garage&link_names=1&username=' + app.username + '&as_user=true&pretty=1';
+    var url =
+        'https://slack.com/api/chat.postMessage?token=' + app.token +
+        '&channel=' + app.channel +
+        '&text=@door-service: garage&link_names=1' +
+        '&username=' + app.username +
+        '&as_user=true&pretty=1';
     app.sendAction(url);
   },
 
