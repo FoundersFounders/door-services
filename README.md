@@ -1,6 +1,6 @@
 # Door Services
 
-This project contains the 2 services and mobile app concerning the FoundersFounders door.
+This project contains the 2 services and a mobile app concerning the FoundersFounders door.
 
 ## Doorbell service
 
@@ -15,7 +15,4 @@ to let ESP8266 known when to open the door.
 
 ## Mobile App
 
-Is an web app to send messages to slack bot for door and garage opening services.
-You can build a cordova app with it or use localy in your browser.
-In your cordova project make sure you are using cordova-plugin-whitelist and replace the token and username placeholders on app.js.
-
+A web app to send messages to a slack bot for door and garage opening services.
