@@ -1,0 +1,7 @@
+{
+  "name": "mobile-app",
+  "private": true,
+  "dependencies": {
+    "Framework7": "framework7#^1.4.2"
+  }
+}
