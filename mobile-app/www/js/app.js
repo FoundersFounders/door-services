@@ -3,8 +3,14 @@ var $$ = Dom7;
 
 var app = {
 
-  token: '<TOKEN>',
   channel: '<CHANNEL>',
+  token: '',
+
+  clientId: 'CLIENT_ID',
+  clientSecret: 'CLIENT_SECRET',
+  requiredScope: 'chat:write:user',
+  redirectUri: 'REDIRECT_URI',
+  teamId: 'TEAM_ID',
 
   f7: new Framework7({
     material: true
@@ -66,7 +72,45 @@ var app = {
   },
 
   onDeviceReady: function() {
-    app.showNotification("Device Ready");
+    var authUrl = 'https://slack.com/oauth/authorize' +
+        '?client_id=' + app.clientId +
+        '&client_secret=' + app.clientSecret +
+        '&scope=' + app.requiredScope +
+        '&team=' + app.teamId;
+
+    var authWindow = cordova.InAppBrowser.open(authUrl, '_blank', 'location=no,toolbar=no');
+
+    authWindow.addEventListener('loadstart', function(e) {
+      var code = new RegExp(app.redirectUri + '\\?code=([^&]+)?').exec(e.url);
+      if (code) code = code[1];
+
+      var error = new RegExp(app.redirectUri + '\\?error=([^&]+)').exec(e.url);
+      if (error) error = error[1];
+
+      if (code || error) {
+        authWindow.close();
+      }
+
+      if (code) {
+        $$.ajax({
+          url: 'https://slack.com/api/oauth.access' +
+            '?client_id=' + app.clientId +
+            '&client_secret=' + app.clientSecret +
+            '&code=' + code,
+          dataType: 'json',
+          success: function (data) {
+            app.token = data.access_token;
+            app.showNotification("Slack authentication successful");
+          }
+        });
+      }
+
+      if (error) {
+        app.showNotification("Error: " + error);
+      }
+    });
+
+    app.showNotification("Device ready");
   },
 
   sendAction: function(url) {
