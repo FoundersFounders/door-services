@@ -14,7 +14,7 @@
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
-    <icon src="www/img/logo.png" />
+    <icon src="www/img/icon.png" />
     <platform name="android">
         <allow-intent href="market:*" />
         <preference name="Orientation" value="portrait" />
