@@ -4,6 +4,7 @@ Install the required dependencies:
 
 ```
 npm install -g cordova
+npm install -g cordova-icon
 npm install -g bower
 cordova prepare
 bower install
