@@ -4,7 +4,6 @@ var $$ = Dom7;
 var app = {
 
   token: '<TOKEN>',
-  username: '<USERNAME>',
   channel: '<CHANNEL>',
 
   f7: new Framework7({
@@ -24,8 +23,7 @@ var app = {
         'https://slack.com/api/chat.postMessage?token=' + app.token +
         '&channel=' + app.channel +
         '&text=@door-service: open&link_names=1' +
-        '&username=' + app.username +
-        '&as_user=true&pretty=1';
+        '&as_user=true';
     app.sendAction(url);
   },
 
@@ -40,8 +38,7 @@ var app = {
         'https://slack.com/api/chat.postMessage?token=' + app.token +
         '&channel=' + app.channel +
         '&text=@door-service: garage&link_names=1' +
-        '&username=' + app.username +
-        '&as_user=true&pretty=1';
+        '&as_user=true';
     app.sendAction(url);
   },
 
@@ -49,12 +46,13 @@ var app = {
   initialize: function() {
     app.bindEvents();
   },
+
   // Bind Event Listeners
   //
   // Bind any events that are required on startup. Common events are:
   // 'load', 'deviceready', 'offline', and 'online'.
   bindEvents: function() {
-    $$(document).on('deviceready', this.onDeviceReady, false);
+    $$(document).on('deviceready', app.onDeviceReady, false);
 
     var eventType = 'click';
 
@@ -63,8 +61,8 @@ var app = {
       eventType = 'touchstart';
     }
 
-    $$('#open-door').on(eventType, this.openDoor);
-    $$('#open-garage').on(eventType, this.openGarage);
+    $$('#open-door').on(eventType, app.openDoor);
+    $$('#open-garage').on(eventType, app.openGarage);
   },
 
   onDeviceReady: function() {
