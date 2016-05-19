@@ -71,7 +71,21 @@ var app = {
     $$('#open-garage').on(eventType, app.openGarage);
   },
 
-  onDeviceReady: function() {
+  getToken: function(fileEntry) {
+    fileEntry.file(function (file) {
+      var reader = new FileReader();
+      reader.onloadend = function() {
+        if (this.result.length != 0) {
+          app.token = this.result;
+        } else {
+          app.getOAuthToken(fileEntry);
+        }
+      };
+      reader.readAsText(file);
+    });
+  },
+
+  getOAuthToken: function(fileEntry) {
     var authUrl = 'https://slack.com/oauth/authorize' +
         '?client_id=' + app.clientId +
         '&client_secret=' + app.clientSecret +
@@ -100,6 +114,7 @@ var app = {
           dataType: 'json',
           success: function (data) {
             app.token = data.access_token;
+            app.saveToken(fileEntry, app.token);
             app.showNotification("Slack authentication successful");
           }
         });
@@ -108,6 +123,20 @@ var app = {
       if (error) {
         app.showNotification("Error: " + error);
       }
+    });
+  },
+
+  saveToken: function(fileEntry, token) {
+    fileEntry.createWriter(function (fileWriter) {
+      fileWriter.write(token);
+    });
+  },
+
+  onDeviceReady: function() {
+    window.requestFileSystem(LocalFileSystem.PERSISTENT, 1024, function (fs) {
+      fs.root.getFile("token", { create: true, exclusive: false }, function (fileEntry) {
+        app.getToken(fileEntry);
+      });
     });
 
     app.showNotification("Device ready");
