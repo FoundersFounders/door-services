@@ -16,7 +16,7 @@
   "scripts": {
     "jsres": "mkdir -p www/lib/js && cp node_modules/framework7/dist/js/*.js www/lib/js",
     "cssres": "mkdir -p www/lib/css && cp node_modules/framework7/dist/css/*.css www/lib/css",
-    "postinstall": "npm run -s jsres && npm run -s cssres",
+    "postinstall": "npm run -s jsres && npm run -s cssres && cordova prepare",
     "requirements": "cordova requirements",
     "build": "cordova build",
     "start": "cordova run"
