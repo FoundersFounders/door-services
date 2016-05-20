@@ -3,9 +3,14 @@ var $$ = Dom7;
 
 var app = {
 
-  token: '<TOKEN>',
-  username: '<USERNAME>',
   channel: '<CHANNEL>',
+  token: '',
+
+  clientId: 'CLIENT_ID',
+  clientSecret: 'CLIENT_SECRET',
+  requiredScope: 'chat:write:user',
+  redirectUri: 'REDIRECT_URI',
+  teamId: 'TEAM_ID',
 
   f7: new Framework7({
     material: true
@@ -24,8 +29,7 @@ var app = {
         'https://slack.com/api/chat.postMessage?token=' + app.token +
         '&channel=' + app.channel +
         '&text=@door-service: open&link_names=1' +
-        '&username=' + app.username +
-        '&as_user=true&pretty=1';
+        '&as_user=true';
     app.sendAction(url);
   },
 
@@ -40,8 +44,7 @@ var app = {
         'https://slack.com/api/chat.postMessage?token=' + app.token +
         '&channel=' + app.channel +
         '&text=@door-service: garage&link_names=1' +
-        '&username=' + app.username +
-        '&as_user=true&pretty=1';
+        '&as_user=true';
     app.sendAction(url);
   },
 
@@ -49,12 +52,13 @@ var app = {
   initialize: function() {
     app.bindEvents();
   },
+
   // Bind Event Listeners
   //
   // Bind any events that are required on startup. Common events are:
   // 'load', 'deviceready', 'offline', and 'online'.
   bindEvents: function() {
-    $$(document).on('deviceready', this.onDeviceReady, false);
+    $$(document).on('deviceready', app.onDeviceReady, false);
 
     var eventType = 'click';
 
@@ -63,12 +67,79 @@ var app = {
       eventType = 'touchstart';
     }
 
-    $$('#open-door').on(eventType, this.openDoor);
-    $$('#open-garage').on(eventType, this.openGarage);
+    $$('#open-door').on(eventType, app.openDoor);
+    $$('#open-garage').on(eventType, app.openGarage);
+  },
+
+  getToken: function(fileEntry) {
+    fileEntry.file(function (file) {
+      var reader = new FileReader();
+      reader.onloadend = function() {
+        if (this.result.length != 0) {
+          app.token = this.result;
+        } else {
+          app.getOAuthToken(fileEntry);
+        }
+      };
+      reader.readAsText(file);
+    });
+  },
+
+  getOAuthToken: function(fileEntry) {
+    var authUrl = 'https://slack.com/oauth/authorize' +
+        '?client_id=' + app.clientId +
+        '&client_secret=' + app.clientSecret +
+        '&scope=' + app.requiredScope +
+        '&team=' + app.teamId;
+
+    var authWindow = cordova.InAppBrowser.open(authUrl, '_blank', 'location=no,toolbar=no');
+
+    authWindow.addEventListener('loadstart', function(e) {
+      var code = new RegExp(app.redirectUri + '\\?code=([^&]+)?').exec(e.url);
+      if (code) code = code[1];
+
+      var error = new RegExp(app.redirectUri + '\\?error=([^&]+)').exec(e.url);
+      if (error) error = error[1];
+
+      if (code || error) {
+        authWindow.close();
+      }
+
+      if (code) {
+        $$.ajax({
+          url: 'https://slack.com/api/oauth.access' +
+            '?client_id=' + app.clientId +
+            '&client_secret=' + app.clientSecret +
+            '&code=' + code,
+          dataType: 'json',
+          success: function (data) {
+            app.token = data.access_token;
+            app.saveToken(fileEntry, app.token);
+            app.showNotification("Slack authentication successful");
+          }
+        });
+      }
+
+      if (error) {
+        app.showNotification("Error: " + error);
+      }
+    });
+  },
+
+  saveToken: function(fileEntry, token) {
+    fileEntry.createWriter(function (fileWriter) {
+      fileWriter.write(token);
+    });
   },
 
   onDeviceReady: function() {
-    app.showNotification("Device Ready");
+    window.requestFileSystem(LocalFileSystem.PERSISTENT, 1024, function (fs) {
+      fs.root.getFile("token", { create: true, exclusive: false }, function (fileEntry) {
+        app.getToken(fileEntry);
+      });
+    });
+
+    app.showNotification("Device ready");
   },
 
   sendAction: function(url) {

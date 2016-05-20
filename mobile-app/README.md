@@ -4,9 +4,24 @@ Install the required dependencies:
 
 ```
 npm install -g cordova
+npm install -g cordova-icon
 npm install -g bower
 cordova prepare
 bower install
+```
+
+`cordova-icon` requires `ImageMagick`:
+
+```
+brew install imagemagick # OSX
+sudo apt-get install imagemagick # Debian / Ubuntu
+```
+
+To build the app for iOS you must also install:
+
+```
+npm install -g ios-sim
+npm install -g ios-deploy
 ```
 
 To build the app:
