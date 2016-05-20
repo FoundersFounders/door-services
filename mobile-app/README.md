@@ -3,37 +3,37 @@
 Install the required dependencies:
 
 ```
-npm install -g cordova
-npm install -g cordova-icon
-npm install -g bower
-cordova prepare
-bower install
+npm install
 ```
 
 `cordova-icon` requires `ImageMagick`:
 
 ```
-brew install imagemagick # OSX
-sudo apt-get install imagemagick # Debian / Ubuntu
+brew install imagemagick            # OSX
+sudo apt-get install imagemagick    # Debian / Ubuntu
 ```
 
-To build the app for iOS you must also install:
+To build the app for iOS you must also install (locally or globally):
 
 ```
-npm install -g ios-sim
-npm install -g ios-deploy
+npm install ios-sim
+npm install ios-deploy
 ```
 
-To build the app:
+To build and run the app in the platform simulator:
 
 ```
-cordova build
+npm start                   # all platforms
+npm start android           # android app only
+npm start ios               # iOS app only
 ```
 
-To run the app in the platform simulator:
+To build the app only without running it:
 
 ```
-cordova run
+npm run build               # all platforms
+npm run build -- android    # android app only
+npm run build -- ios        # iOS app only
 ```
 
 # Reference
