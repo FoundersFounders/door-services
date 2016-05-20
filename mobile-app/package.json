@@ -1,0 +1,24 @@
+{
+  "name": "door-service-mobile-app",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:FoundersFounders/door-services.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "framework7": "^1.4.2"
+  },
+  "devDependencies": {
+    "cordova": "^6.1.1",
+    "cordova-icon": "^0.7.0"
+  },
+  "scripts": {
+    "jsres": "mkdir -p www/lib/js && cp node_modules/framework7/dist/js/*.js www/lib/js",
+    "cssres": "mkdir -p www/lib/css && cp node_modules/framework7/dist/css/*.css www/lib/css",
+    "postinstall": "npm run -s jsres && npm run -s cssres && cordova prepare",
+    "requirements": "cordova requirements",
+    "build": "cordova build",
+    "start": "cordova run"
+  }
+}
