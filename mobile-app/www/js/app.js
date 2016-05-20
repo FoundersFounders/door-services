@@ -3,14 +3,16 @@ var $$ = Dom7;
 
 var app = {
 
+  // -- to be filled before compiling the app --
+  clientId: '<CLIENT_ID>',
+  clientSecret: '<CLIENT_SECRET>',
+  teamId: '<TEAM_ID>',
   channel: '<CHANNEL>',
-  token: '',
+  redirectUri: '<REDIRECT_URI>',
+  // --
 
-  clientId: 'CLIENT_ID',
-  clientSecret: 'CLIENT_SECRET',
+  token: '',
   requiredScope: 'chat:write:user',
-  redirectUri: 'REDIRECT_URI',
-  teamId: 'TEAM_ID',
 
   f7: new Framework7({
     material: true
