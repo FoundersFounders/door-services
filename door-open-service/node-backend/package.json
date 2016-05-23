@@ -3,12 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/app.js",
-  "scripts": {
-    "start": "node -r babel-register src/app.js",
-    "lint": "eslint src",
-    "lint-fix": "eslint --fix src",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/FoundersFounders/door-services.git"
@@ -40,5 +34,14 @@
   "devDependencies": {
     "babel-eslint": "6.0.4",
     "eslint": "2.10.2"
+  },
+  "scripts": {
+    "start": "node -r babel-register src/app.js",
+    "lint": "eslint src",
+    "lint-fix": "eslint --fix src",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docker:image": "echo founders2/f2door:$(git rev-parse HEAD | head -c 10)",
+    "docker:publishLocal": "docker build -t $(npm run -s docker:image) .",
+    "docker:publish": "npm run docker:publishLocal && docker push $(npm run -s docker:image)"
   }
 }
