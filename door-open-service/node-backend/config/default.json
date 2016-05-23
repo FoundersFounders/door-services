@@ -1,7 +1,5 @@
 {
   "slackBot": {
-    "channel": "<CHANNEL_NAME>",
-    "botToken": "<BOT_TOKEN>"
   },
   "socketServer": {
     "port": 8300
@@ -12,8 +10,7 @@
     },
     "http": {
       "enabled": false,
-      "port": 3000,
-      "secret": "<UNIQUE_PASSWORD>"
+      "port": 3000
     }
   }
 }

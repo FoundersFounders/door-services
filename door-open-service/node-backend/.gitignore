@@ -3,5 +3,5 @@ typings
 .vscode
 npm-debug.log
 
-config.json
+config/local*.json
 stats.db

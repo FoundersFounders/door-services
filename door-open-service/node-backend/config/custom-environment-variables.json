@@ -1,0 +1,19 @@
+{
+  "slackBot": {
+    "channel": "SLACK_CHANNEL_NAME",
+    "botToken": "SLACK_BOT_TOKEN"
+  },
+  "socketServer": {
+    "port": "SOCKET_SERVER_PORT"
+  },
+  "interfaces": {
+    "slack": {
+      "enabled": "SLACK_INTERFACE_ENABLED"
+    },
+    "http": {
+      "enabled": "HTTP_INTERFACE_ENABLED",
+      "port": "HTTP_SERVER_PORT",
+      "secret": "HTTP_SERVER_SECRET"
+    }
+  }
+}
