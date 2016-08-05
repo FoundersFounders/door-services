@@ -11,6 +11,14 @@ var app = {
   redirectUri: '<REDIRECT_URI>',
   // --
 
+  appScope: function() {
+    if ( document.URL.indexOf( 'http://' ) === -1 && document.URL.indexOf( 'https://' ) === -1 ) {
+      return "app";
+    } else {
+      return "web";
+    }
+  },
+
   token: '',
   requiredScope: 'chat:write:user',
 
@@ -26,11 +34,11 @@ var app = {
     if (app.turnOffRequests) {
       return;
     }
-
+    var adMessage = (app.appScope() == "web") ? ' - via webapp, <http://www.founders-founders.com/doorservices/|get yours here>' : ' - via app, <https://github.com/FoundersFounders/door-services|get yours here>';
     var url =
         'https://slack.com/api/chat.postMessage?token=' + app.token +
         '&channel=' + app.channel +
-        '&text=@door-service: open&link_names=1' +
+        '&text=@door-service: open' + adMessage + '&link_names=1' +
         '&as_user=true';
     app.sendAction(url);
   },
@@ -45,7 +53,7 @@ var app = {
     var url =
         'https://slack.com/api/chat.postMessage?token=' + app.token +
         '&channel=' + app.channel +
-        '&text=@door-service: garage&link_names=1' +
+        '&text=@door-service: garage' + adMessage + '&link_names=1' +
         '&as_user=true';
     app.sendAction(url);
   },
@@ -94,38 +102,61 @@ var app = {
         '&scope=' + app.requiredScope +
         '&team=' + app.teamId;
 
-    var authWindow = cordova.InAppBrowser.open(authUrl, '_blank', 'location=no,toolbar=no');
+    if ( app.appScope() == "app" ) {
+        // Cordova application
+        var authWindow = cordova.InAppBrowser.open(authUrl, '_blank', 'location=no,toolbar=no');
 
-    authWindow.addEventListener('loadstart', function(e) {
-      var code = new RegExp(app.redirectUri + '\\?code=([^&]+)?').exec(e.url);
-      if (code) code = code[1];
+        authWindow.addEventListener('loadstart', function(e) {
+          var code = new RegExp(app.redirectUri + '\\?code=([^&]+)?').exec(e.url);
+          if (code) code = code[1];
 
-      var error = new RegExp(app.redirectUri + '\\?error=([^&]+)').exec(e.url);
-      if (error) error = error[1];
+          var error = new RegExp(app.redirectUri + '\\?error=([^&]+)').exec(e.url);
+          if (error) error = error[1];
 
-      if (code || error) {
-        authWindow.close();
-      }
-
-      if (code) {
-        $$.ajax({
-          url: 'https://slack.com/api/oauth.access' +
-            '?client_id=' + app.clientId +
-            '&client_secret=' + app.clientSecret +
-            '&code=' + code,
-          dataType: 'json',
-          success: function (data) {
-            app.token = data.access_token;
-            app.saveToken(fileEntry, app.token);
-            app.showNotification("Slack authentication successful");
+          if (code || error) {
+            authWindow.close();
           }
         });
-      }
 
-      if (error) {
-        app.showNotification("Error: " + error);
+      } else {
+        // Web page, restore browser's original window.open because cordova-inappbrowser-plugin overwrote this
+
+        // check we already have a code
+        var code = new RegExp(app.redirectUri + '\\?code=([^&]+)?').exec(document.URL);
+        if (code) code = code[1];
+        var error = new RegExp(app.redirectUri + '\\?error=([^&]+)').exec(document.URL);
+        if (error) error = error[1];
+        function retrieveNative(native) {
+          var iframe = document.createElement('iframe');
+          document.body.appendChild(iframe);
+          var retrieved = iframe.contentWindow[native];
+          document.body.removeChild(iframe);
+          return retrieved;
       }
-    });
+        window.open = retrieveNative('open');
+        if (!(code || error)) {
+          window.open(authUrl, '_self', 'location=no,toolbar=no');
+        }
+    }
+
+    if (error) {
+      app.showNotification("Error: " + error);
+    }
+
+    if (code) {
+      $$.ajax({
+        url: 'https://slack.com/api/oauth.access' +
+          '?client_id=' + app.clientId +
+          '&client_secret=' + app.clientSecret +
+          '&code=' + code,
+        dataType: 'json',
+        success: function (data) {
+          app.token = data.access_token;
+          app.saveToken(fileEntry, app.token);
+          app.showNotification("Slack authentication successful");
+        }
+      });
+    }
   },
 
   saveToken: function(fileEntry, token) {
