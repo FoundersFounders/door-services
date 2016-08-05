@@ -34,7 +34,7 @@ var app = {
     if (app.turnOffRequests) {
       return;
     }
-    var adMessage = (app.appScope() == "web") ? ' - via webapp, <http://www.founders-founders.com/doorservices/|get yours here>' : ' - via app, <https://github.com/FoundersFounders/door-services|get yours here>';
+    adMessage = (app.appScope() == "web") ? ' - via webapp, <http://www.founders-founders.com/doorservices/|get yours here>' : ' - via app, <https://github.com/FoundersFounders/door-services|get yours here>';
     var url =
         'https://slack.com/api/chat.postMessage?token=' + app.token +
         '&channel=' + app.channel +
@@ -49,7 +49,7 @@ var app = {
     if (app.turnOffRequests) {
       return;
     }
-
+    adMessage = (app.appScope() == "web") ? ' - via webapp, <http://www.founders-founders.com/doorservices/|get yours here>' : ' - via app, <https://github.com/FoundersFounders/door-services|get yours here>';
     var url =
         'https://slack.com/api/chat.postMessage?token=' + app.token +
         '&channel=' + app.channel +
