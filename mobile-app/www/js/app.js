@@ -126,16 +126,8 @@ var app = {
         if (code) code = code[1];
         var error = new RegExp(app.redirectUri + '\\?error=([^&]+)').exec(document.URL);
         if (error) error = error[1];
-        function retrieveNative(native) {
-          var iframe = document.createElement('iframe');
-          document.body.appendChild(iframe);
-          var retrieved = iframe.contentWindow[native];
-          document.body.removeChild(iframe);
-          return retrieved;
-      }
-        window.open = retrieveNative('open');
         if (!(code || error)) {
-          window.open(authUrl, '_self', 'location=no,toolbar=no');
+          myWindowOpen(authUrl, '_self', 'location=no,toolbar=no');
         }
     }
 
