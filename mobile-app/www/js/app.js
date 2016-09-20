@@ -27,6 +27,7 @@ var app = {
   }),
 
   turnOffRequests: false,
+  slackAuthTokenKeyName: "f2slackauthtoken",
 
   openDoor: function() {
     app.showNotification("Opening the door", 3000);
@@ -58,6 +59,29 @@ var app = {
     app.sendAction(url);
   },
 
+  initiateSlackAuth: function() {
+//    window.requestFileSystem(LocalFileSystem.PERSISTENT, 1024, function (fs) {
+//      fs.root.getFile("token", { create: true, exclusive: false }, function (fileEntry) {
+//        app.getToken(fileEntry);
+//      });
+//    }); 
+    var storedToken = window.localStorage.getItem(app.slackAuthTokenKeyName);
+    if (storedToken === null) {
+      app.getOAuthToken();
+  } else {
+    app.token = storedToken;
+    app.showNotification("Found local slack auth token: "+app.token);
+  }
+  },
+
+  resetSlackAuth: function() {
+    window.localStorage.removeItem(app.slackAuthTokenKeyName);
+    app.token = '';
+    app.showNotification("Slack auth token deleted");
+    app.initiateSlackAuth();
+  },
+
+
   // Application Constructor
   initialize: function() {
     app.bindEvents();
@@ -79,6 +103,7 @@ var app = {
 
     $$('#open-door').on(eventType, app.openDoor);
     $$('#open-garage').on(eventType, app.openGarage);
+    $$('#reset-slack-auth').on(eventType, app.resetSlackAuth);
   },
 
   getToken: function(fileEntry) {
@@ -95,7 +120,7 @@ var app = {
     });
   },
 
-  getOAuthToken: function(fileEntry) {
+  getOAuthToken: function() {
     var authUrl = 'https://slack.com/oauth/authorize' +
         '?client_id=' + app.clientId +
         '&client_secret=' + app.clientSecret +
@@ -143,27 +168,26 @@ var app = {
           '&code=' + code,
         dataType: 'json',
         success: function (data) {
-          app.token = data.access_token;
-          app.saveToken(fileEntry, app.token);
-          app.showNotification("Slack authentication successful");
+          if (data.access_token != undefined) { 
+            app.token = data.access_token;
+            app.saveToken(app.token);
+            app.showNotification("Slack authentication successful");
+          } else {
+            if (data.ok == false) {
+              app.showNotification("Slack get auth token error: " + data.error);
+            }
+          }
         }
       });
     }
   },
 
-  saveToken: function(fileEntry, token) {
-    fileEntry.createWriter(function (fileWriter) {
-      fileWriter.write(token);
-    });
+  saveToken: function(token) {
+      window.localStorage.setItem(app.slackAuthTokenKeyName,token);
   },
 
   onDeviceReady: function() {
-    window.requestFileSystem(LocalFileSystem.PERSISTENT, 1024, function (fs) {
-      fs.root.getFile("token", { create: true, exclusive: false }, function (fileEntry) {
-        app.getToken(fileEntry);
-      });
-    });
-
+    app.initiateSlackAuth();
     app.showNotification("Device ready");
   },
 
