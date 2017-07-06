@@ -15,6 +15,7 @@ class DoorSlackBot {
       autoReconnect: true
     });
 
+    this.doorTimes=JSON.parse(JSON.stringify(config.doorTimes));
     this.msgCallbacks = [];
 
     this.rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, rtmStartData => {

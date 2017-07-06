@@ -1,5 +1,12 @@
 {
   "slackBot": {
+    "doorTimes": {
+      "garage": {
+        "lockTime": 25000,
+        "lastUser": "",
+        "lastTime": 0
+      }
+    }
   },
   "socketServer": {
     "port": 8300
@@ -11,13 +18,6 @@
     "http": {
       "enabled": false,
       "port": 3000
-    },
-    "doorTimes": {
-      "garage": 25000 
-  },
-    "lock": {
-      "user": "",
-      "time":"0"
-  }
+    }
   }
 }
