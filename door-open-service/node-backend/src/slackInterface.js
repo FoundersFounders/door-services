@@ -23,20 +23,19 @@ export default function (config, slackBot, sockServer) {
           "Consider dispatching a drone to pick up a human.");
 
     } else {
-      
-         config.doorTimes = { "garage": 25 * 1000 };
-      
-      if(config.lock){ 
-          if(config.lock.user!==user.email && (+new Date() - config.lock.time)< config.doorTimes["garage"] ){
-            //Another user is trying to manage the door, and the door is still within lock time, so we must abort
-            slackBot.postMessage(`Opening the garage denied by a pending lock of ${config.lock.user}. ...`);  
-            return;
-        } 
-        config.lock.user=user.email, config.lock.time=+new Date(); //update lock data
-    }else{
-        config.lock={user:user.email, time:+new Date() }; 
-      }
 
+      config.doorTimes = { "garage": 25 * 1000 };
+
+      if (config.lock) {
+        if (config.lock.user!==user.email && (+new Date() - config.lock.time)< config.doorTimes["garage"]) {
+            //Another user is trying to manage the door, and the door is still within lock time, so we must abort
+          slackBot.postMessage(`Opening the garage denied by a pending lock of ${config.lock.user}. ...`);
+          return;
+        }
+        config.lock.user=user.email, config.lock.time=+new Date(); //update lock data
+      } else {
+        config.lock={ user:user.email, time:+new Date() };
+      }
       sockServer.broadcast("garage", "5000");
       StatsDatabase.registerGarageOpen(user);
       slackBot.postMessage(`Opening the garage as requested by ${user.name} (${user.email})...`);
