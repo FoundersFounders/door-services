@@ -24,16 +24,16 @@ export default function (config, slackBot, sockServer) {
 
     } else {
       
-      config.doorTimes = { "garage": 25 * 1000 };  //change this to be configurable
+         config.doorTimes = { "garage": 25 * 1000 };
       
       if(config.lock){ 
-          if(config.lock.user!=user.email && (+new Date() - config.lock.time)< config.doorTimes["garage"] ){
+          if(config.lock.user!==user.email && (+new Date() - config.lock.time)< config.doorTimes["garage"] ){
             //Another user is trying to manage the door, and the door is still within lock time, so we must abort
             slackBot.postMessage(`Opening the garage denied by a pending lock of ${config.lock.user}. ...`);  
             return;
         } 
         config.lock.user=user.email, config.lock.time=+new Date(); //update lock data
-		  }else{
+    }else{
         config.lock={user:user.email, time:+new Date() }; 
       }
 
