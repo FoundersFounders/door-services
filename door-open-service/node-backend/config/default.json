@@ -11,6 +11,13 @@
     "http": {
       "enabled": false,
       "port": 3000
-    }
+    },
+    "doorTimes": {
+      "garage": 25000 
+  },
+    "lock": {
+      "user": "",
+      "time":"0"
+  }
   }
 }
