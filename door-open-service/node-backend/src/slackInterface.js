@@ -31,7 +31,8 @@ export default function (config, slackBot, sockServer) {
           slackBot.postMessage(`Opening the garage denied by a pending lock of ${door.lastUser}!`);
           return;
         }
-        door.lastUser = user.email, door.lastTime = +new Date(); //update lock data for this door name
+        door.lastUser = user.email;
+        door.lastTime = +new Date(); //update lock data for this door name
       }
       sockServer.broadcast("garage", "5000");
       StatsDatabase.registerGarageOpen(user);
