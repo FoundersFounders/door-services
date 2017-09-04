@@ -16,8 +16,17 @@ class DoorSocketServer {
     this.createServer();
   }
 
-  available(group) {
-    return _.find(this.clients, socketInfo => socketInfo.group === group);
+  canOpen(doorId) {
+    return _.find(this.clients, socketInfo => socketInfo.group === doorId);
+  }
+
+  open(doorId, time) {
+    _.each(this.clients, ({ group: socketGroup, socket }) => {
+      if (socketGroup === doorId) socket.write(time.toString());
+    });
+
+    // Log it to the server output too
+    console.log(`Broadcast to ${doorId}: ${time}`);
   }
 
   createServer() {
@@ -59,15 +68,6 @@ class DoorSocketServer {
         delete this.clients[socket.name];
       });
     }).listen(this.port);
-  }
-
-  broadcast(group, message) {
-    _.each(this.clients, ({ group: socketGroup, socket }) => {
-      if (socketGroup === group) socket.write(message);
-    });
-
-    // Log it to the server output too
-    console.log(`Broadcast to ${group}: ${message}`);
   }
 }
 

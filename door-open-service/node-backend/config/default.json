@@ -8,8 +8,11 @@
       }
     }
   },
-  "socketServer": {
-    "port": 8300
+  "openers": {
+    "socketServer": {
+      "enabled": true,
+      "port": 8300
+    }
   },
   "interfaces": {
     "slack": {

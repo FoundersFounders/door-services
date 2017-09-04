@@ -9,16 +9,16 @@ import StatsDatabase from "./StatsDatabase";
  * channel.
  * @param {object} config the Slack interface configuration
  * @param {DoorSlackBot} slackBot the Slack bot to use for interacting and logging door openings
- * @param {DoorSocketServer} sockServer the server used to broadcast messages to devices
+ * @param {DoorSocketServer} backend the server used to broadcast messages to devices
  * @returns {undefined}
  */
-export default function (config, slackBot, sockServer) {
+export default function (config, slackBot, backend) {
 
   slackBot.onMessageLike(/garage/i, user => {
     if (!user) {
       slackBot.postMessage("Unrecognized user.");
 
-    } else if (!sockServer.available("garage")) {
+    } else if (!backend.canOpen("garage")) {
       slackBot.postMessage("The remote garage opening service is not operational at the moment. " +
           "Consider dispatching a drone to pick up a human.");
 
@@ -34,7 +34,7 @@ export default function (config, slackBot, sockServer) {
         door.lastUser = user.email;
         door.lastTime = new Date().getTime(); // update lock data for this door name
       }
-      sockServer.broadcast("garage", "5000");
+      backend.open("garage", 5000);
       StatsDatabase.registerGarageOpen(user);
       slackBot.postMessage(`Opening the garage as requested by ${user.name} (${user.email})...`);
     }
@@ -44,12 +44,12 @@ export default function (config, slackBot, sockServer) {
     if (!user) {
       slackBot.postMessage("Unrecognized user.");
 
-    } else if (!sockServer.available("door")) {
+    } else if (!backend.canOpen("door")) {
       slackBot.postMessage("The remote door opening service is not operational at the moment. " +
           "Consider dispatching a drone to pick up a human.");
 
     } else {
-      sockServer.broadcast("door", "2500");
+      backend.open("door", 2500);
       StatsDatabase.registerDoorOpen(user);
       slackBot.postMessage(`Opening the door as requested by ${user.name} (${user.email})...`);
     }

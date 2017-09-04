@@ -9,10 +9,10 @@ import StatsDatabase from "./StatsDatabase";
  * Opens an HTTP server for users to make requests to the door backend.
  * @param {object} config the HTTP interface configuration
  * @param {DoorSlackBot} slackBot the Slack bot to use for logging door openings
- * @param {DoorSocketServer} sockServer the server used to broadcast messages to devices
+ * @param {DoorSocketServer} backend the server used to broadcast messages to devices
  * @returns {undefined}
  */
-export default function (config, slackBot, sockServer) {
+export default function (config, slackBot, backend) {
   const server = new Hapi.Server();
   server.connection({ port: config.port });
 
@@ -46,7 +46,7 @@ export default function (config, slackBot, sockServer) {
           reply(Boom.unauthorized());
           return;
         }
-        sockServer.broadcast("door", "2500");
+        backend.open("door", 2500);
         StatsDatabase.registerDoorOpen(user);
         slackBot.postMessage(`Opening the door as requested by ${user.name} (${user.email})...`);
         reply(user);
