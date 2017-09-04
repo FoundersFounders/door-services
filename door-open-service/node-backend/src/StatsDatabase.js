@@ -68,11 +68,9 @@ class StatsDatabase {
             "when 4 then 'Thu' " +
             "when 5 then 'Fri' " +
             "else 'Sat' end as dayofweek, COUNT(timestamp) as count FROM door_opens " +
-            `WHERE type = '${type}' GROUP BY dayofweek`, {
-              type: sequelize.QueryTypes.SELECT
-            }),
+            `WHERE type = '${type}' GROUP BY dayofweek`, { type: sequelize.QueryTypes.SELECT }),
         timestampQ: DoorOpens.findOne({
-          order: "timestamp ASC",
+          order: [["timestamp", "ASC"]],
           where: { type },
           limit: 1,
           attributes: ["timestamp"]

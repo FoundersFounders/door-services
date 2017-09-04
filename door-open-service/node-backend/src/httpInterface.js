@@ -65,13 +65,12 @@ export default function (config, slackBot, sockServer) {
   server.register({
     register: Good,
     options: {
-      reporters: [{
-        reporter: require("good-console"),
-        events: {
-          response: "*",
-          log: "*"
-        }
-      }]
+      reporters: {
+        consoleReporter: [{
+          module: "good-console",
+          args: [{ log: "*", response: "*" }]
+        }]
+      }
     }
   }, err => {
     if (err) throw err; // something bad happened loading the plugin
