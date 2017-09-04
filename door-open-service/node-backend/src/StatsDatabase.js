@@ -59,7 +59,7 @@ class StatsDatabase {
   static getStats() {
     const queries = type => {
       return {
-        count_per_dayQ: sequelize.query(
+        countPerDayQ: sequelize.query(
           "SELECT case cast(strftime('%w', timestamp) as integer) " +
             "when 0 then 'Sun' " +
             "when 1 then 'Mon' " +
@@ -83,7 +83,7 @@ class StatsDatabase {
     return Promise.all(types.map(t => Promise.props(queries(t)))).then(data => {
       return _.map(data, val => {
         const counts0 = _.object(DAYS_OF_WEEK, _.map(DAYS_OF_WEEK, () => 0));
-        const countsDay = _.chain(val.count_per_dayQ).indexBy("dayofweek").mapObject(day => day.count).value();
+        const countsDay = _.chain(val.countPerDayQ).indexBy("dayofweek").mapObject(day => day.count).value();
         return _.extendOwn(counts0, countsDay, {
           since: val.timestampQ ? new Date(val.timestampQ.timestamp).toISOString() : null
         });

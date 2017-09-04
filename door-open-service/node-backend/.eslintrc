@@ -15,9 +15,11 @@
 
   "rules": {
     "eqeqeq": [2, "smart"],
+    "no-implicit-coercion": 2,
     "no-var": 2,
     "valid-jsdoc": 2,
 
+    "camelcase": 1,
     "indent": [1, 2, { "SwitchCase": 1 }],
     "keyword-spacing": 1,
     "max-len": [1, 120, 4],
@@ -31,6 +33,7 @@
     "space-before-function-paren": [1, { "anonymous": "always", "named": "never" }],
     "space-in-parens": [1, "never"],
     "space-infix-ops": 1,
+    "spaced-comment": 1,
 
     "no-console": 0
   }
