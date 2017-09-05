@@ -2,6 +2,7 @@ import histogram from "bars";
 import moment from "moment";
 import _ from "underscore";
 
+import DoorBackend from "./DoorBackend";
 import StatsDatabase from "./StatsDatabase";
 
 /**
@@ -14,45 +15,34 @@ import StatsDatabase from "./StatsDatabase";
  */
 export default function (config, slackBot, backend) {
 
-  slackBot.onMessageLike(/garage/i, user => {
-    if (!user) {
-      slackBot.postMessage("Unrecognized user.");
+  function handleOpenCommand(user, doorId, onSuccess) {
+    const result = backend.open(user, doorId);
+    switch (result.result) {
+      case DoorBackend.OPEN_RESULT.SUCCESS:
+        onSuccess();
+        slackBot.postMessage(`Opening the ${doorId} as requested by ${user.name} (${user.email})...`);
+        break;
 
-    } else if (!backend.canOpen("garage")) {
-      slackBot.postMessage("The remote garage opening service is not operational at the moment. " +
+      case DoorBackend.OPEN_RESULT.LOCKED:
+        slackBot.postMessage(`Opening the ${doorId} denied by a pending lock of ${result.user}.`);
+        break;
+
+      case DoorBackend.OPEN_RESULT.UNAVAILABLE:
+        slackBot.postMessage(`The remote ${doorId} opening service is not operational at the moment. ` +
           "Consider dispatching a drone to pick up a human.");
+        break;
 
-    } else {
-
-      let door = slackBot.doorTimes["garage"];
-      if (door && door.lockTime > 0 && door.lastUser !== user.email) {
-        let withinTimeLock = (new Date().getTime() - door.lastTime) < door.lockTime;
-        if (withinTimeLock) {
-          slackBot.postMessage(`Opening the garage denied by a pending lock of ${door.lastUser}!`);
-          return;
-        }
-        door.lastUser = user.email;
-        door.lastTime = new Date().getTime(); // update lock data for this door name
-      }
-      backend.open("garage", 5000);
-      StatsDatabase.registerGarageOpen(user);
-      slackBot.postMessage(`Opening the garage as requested by ${user.name} (${user.email})...`);
+      case DoorBackend.OPEN_RESULT.UNAUTHORIZED:
+        slackBot.postMessage("Unrecognized user.");
     }
+  }
+
+  slackBot.onMessageLike(/garage/i, user => {
+    handleOpenCommand(user, "garage", () => StatsDatabase.registerGarageOpen(user));
   });
 
   slackBot.onMessageLike(/open/i, user => {
-    if (!user) {
-      slackBot.postMessage("Unrecognized user.");
-
-    } else if (!backend.canOpen("door")) {
-      slackBot.postMessage("The remote door opening service is not operational at the moment. " +
-          "Consider dispatching a drone to pick up a human.");
-
-    } else {
-      backend.open("door", 2500);
-      StatsDatabase.registerDoorOpen(user);
-      slackBot.postMessage(`Opening the door as requested by ${user.name} (${user.email})...`);
-    }
+    handleOpenCommand(user, "door", () => StatsDatabase.registerDoorOpen(user));
   });
 
   slackBot.onMessageLike(/stats/i, () => {

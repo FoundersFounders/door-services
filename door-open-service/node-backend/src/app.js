@@ -7,7 +7,7 @@ import startSlackInterface from "./slackInterface";
 import config from "config";
 
 const slackBot = new DoorSlackBot(config.get("slackBot"));
-const backend = new DoorBackend();
+const backend = new DoorBackend(config.get("backend"));
 
 if (config.get("openers.socketServer.enabled"))
   backend.addOpener(new DoorSocketServer(config.get("openers.socketServer")));
