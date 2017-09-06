@@ -8,7 +8,9 @@
     },
     "rpiGpio": {
       "enabled": true,
-      "pin": 18
+      "pins": {
+        "garage": 18
+      }
     }
   },
   "interfaces": {

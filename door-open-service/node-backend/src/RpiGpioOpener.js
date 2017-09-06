@@ -5,32 +5,33 @@ class RpiGpioOpener {
 
   constructor(config) {
     gpio.setMode(gpio.MODE_BCM);
-    this.pin = config.pin;
-    this.opening = false;
+    this.pins = config.pins;
+    this.opening = {};
   }
 
   canOpen(doorId) {
-    return doorId === "garage";
+    return this.pins[doorId];
   }
 
   open(doorId, time) {
-    if (doorId !== "garage" || this.opening) return;
+    if (!this.pins[doorId] || this.opening[doorId]) return;
 
-    this.opening = true;
-    this.writePin(true)
+    this.opening[doorId] = true;
+    this.writePin(doorId, true)
       .delay(time)
-      .then(() => this.writePin(false))
+      .then(() => this.writePin(doorId, false))
       .catch(console.error)
-      .finally(() => this.opening = false);
+      .finally(() => this.opening[doorId] = false);
   }
 
-  writePin(value) {
+  writePin(doorId, value) {
+    const pin = this.pins[doorId];
     const gpioSetup = Promise.promisify(gpio.setup, { context: gpio });
     const gpioWrite = Promise.promisify(gpio.write, { context: gpio });
 
-    return gpioSetup(this.pin, gpio.DIR_OUT, gpio.EDGE_NONE)
-      .tap(() => console.log(`Writing '${value}' to pin ${this.pin}`))
-      .then(() => gpioWrite(this.pin, value));
+    return gpioSetup(pin, gpio.DIR_OUT, gpio.EDGE_NONE)
+      .tap(() => console.log(`Writing '${value}' to pin ${pin}`))
+      .then(() => gpioWrite(pin, value));
   }
 }
 
