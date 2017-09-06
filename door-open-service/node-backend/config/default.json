@@ -5,6 +5,10 @@
     "socketServer": {
       "enabled": true,
       "port": 8300
+    },
+    "rpiGpio": {
+      "enabled": true,
+      "pin": 18
     }
   },
   "interfaces": {
