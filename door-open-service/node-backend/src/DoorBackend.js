@@ -20,9 +20,9 @@ class DoorBackend {
 
     // check if the door is locked by the virtue of a recent opening by another person
     const lock = this.locks[doorId];
-    if (lock && lock.lastUser !== user.email) {
+    if (lock) {
       const now = new Date().getTime();
-      if (now - lock.lastTime < lock.lockTime) {
+      if (lock.lastUser !== user.email && now - lock.lastTime < lock.lockTime) {
         return { result: DoorBackend.OPEN_RESULT.LOCKED, user: lock.lastUser };
       }
       lock.lastUser = user.email;
