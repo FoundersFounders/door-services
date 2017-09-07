@@ -1,13 +1,11 @@
+sudo: false
+
 language: node_js
 node_js:
-  - 6
+  - 8
+
+before_script:
+  - cd door-open-service/node-backend
 script:
-  - cd door-open-service/node-backend && npm install && npm run lint
-env:
-  - CXX=g++-4.8
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-4.8
+  - npm install
+  - npm run lint -- --max-warnings=0
