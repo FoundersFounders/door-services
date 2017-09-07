@@ -2,6 +2,7 @@ import histogram from "bars";
 import moment from "moment";
 import _ from "underscore";
 
+import DoorBackend from "./DoorBackend";
 import StatsDatabase from "./StatsDatabase";
 
 /**
@@ -9,50 +10,39 @@ import StatsDatabase from "./StatsDatabase";
  * channel.
  * @param {object} config the Slack interface configuration
  * @param {DoorSlackBot} slackBot the Slack bot to use for interacting and logging door openings
- * @param {DoorSocketServer} sockServer the server used to broadcast messages to devices
+ * @param {DoorSocketServer} backend the server used to broadcast messages to devices
  * @returns {undefined}
  */
-export default function (config, slackBot, sockServer) {
+export default function (config, slackBot, backend) {
+
+  function handleOpenCommand(user, doorId, onSuccess) {
+    const result = backend.open(user, doorId);
+    switch (result.result) {
+      case DoorBackend.OPEN_RESULT.SUCCESS:
+        onSuccess();
+        slackBot.postMessage(`Opening the ${doorId} as requested by ${user.name} (${user.email})...`);
+        break;
+
+      case DoorBackend.OPEN_RESULT.LOCKED:
+        slackBot.postMessage(`Opening the ${doorId} denied by a pending lock of ${result.user}.`);
+        break;
+
+      case DoorBackend.OPEN_RESULT.UNAVAILABLE:
+        slackBot.postMessage(`The remote ${doorId} opening service is not operational at the moment. ` +
+          "Consider dispatching a drone to pick up a human.");
+        break;
+
+      case DoorBackend.OPEN_RESULT.UNAUTHORIZED:
+        slackBot.postMessage("Unrecognized user.");
+    }
+  }
 
   slackBot.onMessageLike(/garage/i, user => {
-    if (!user) {
-      slackBot.postMessage("Unrecognized user.");
-
-    } else if (!sockServer.available("garage")) {
-      slackBot.postMessage("The remote garage opening service is not operational at the moment. " +
-          "Consider dispatching a drone to pick up a human.");
-
-    } else {
-
-      let door = slackBot.doorTimes["garage"];
-      if (door && door.lockTime > 0 && door.lastUser !== user.email) {
-        let withinTimeLock = (new Date().getTime() - door.lastTime) < door.lockTime;
-        if (withinTimeLock) {
-          slackBot.postMessage(`Opening the garage denied by a pending lock of ${door.lastUser}!`);
-          return;
-        }
-        door.lastUser = user.email;
-        door.lastTime = new Date().getTime(); // update lock data for this door name
-      }
-      sockServer.broadcast("garage", "5000");
-      StatsDatabase.registerGarageOpen(user);
-      slackBot.postMessage(`Opening the garage as requested by ${user.name} (${user.email})...`);
-    }
+    handleOpenCommand(user, "garage", () => StatsDatabase.registerGarageOpen(user));
   });
 
   slackBot.onMessageLike(/open/i, user => {
-    if (!user) {
-      slackBot.postMessage("Unrecognized user.");
-
-    } else if (!sockServer.available("door")) {
-      slackBot.postMessage("The remote door opening service is not operational at the moment. " +
-          "Consider dispatching a drone to pick up a human.");
-
-    } else {
-      sockServer.broadcast("door", "2500");
-      StatsDatabase.registerDoorOpen(user);
-      slackBot.postMessage(`Opening the door as requested by ${user.name} (${user.email})...`);
-    }
+    handleOpenCommand(user, "door", () => StatsDatabase.registerDoorOpen(user));
   });
 
   slackBot.onMessageLike(/stats/i, () => {
