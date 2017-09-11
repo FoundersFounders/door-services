@@ -1,5 +1,6 @@
 import Promise from "bluebird";
 import gpio from "rpi-gpio";
+import _ from "underscore";
 
 class RpiGpioOpener {
 
@@ -10,11 +11,11 @@ class RpiGpioOpener {
   }
 
   canOpen(doorId) {
-    return this.pins[doorId];
+    return !_.isUndefined(this.pins[doorId]);
   }
 
   open(doorId, time) {
-    if (!this.pins[doorId] || this.opening[doorId]) return;
+    if (_.isUndefined(this.pins[doorId]) || this.opening[doorId]) return;
 
     this.opening[doorId] = true;
     this.writePin(doorId, true)
