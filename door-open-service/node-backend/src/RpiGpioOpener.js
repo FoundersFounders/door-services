@@ -15,7 +15,7 @@ class RpiGpioOpener {
   }
 
   open(doorId, time) {
-    if (_.isUndefined(this.pins[doorId]) || this.opening[doorId]) return;
+    if (!this.canOpen(doorId) || this.opening[doorId]) return;
 
     this.opening[doorId] = true;
     this.writePin(doorId, true)
