@@ -10,6 +10,9 @@
         <link rel="stylesheet" type="text/css" href="lib/css/framework7.material.colors.min.css">
         <link rel="stylesheet" type="text/css" href="css/index.css">
         <title>Slack Stuff</title>
+        <script>
+        var myWindowOpen = window.open; //cordova overwrites this later on, we need the original function
+        </script>
     </head>
     <body>
         <div class="app">
@@ -22,6 +25,11 @@
             <div class="row app-button">
                 <div class="col-75">
                     <a id="open-garage" href="#" class="button button-big button-fill button-raised color-teal">Open Garage</a>
+                </div>
+            </div>
+            <div class="row app-button">
+                <div class="col-75">
+                    <a id="reset-slack-auth" href="#" class="button button-big button-fill button-raised color-orange">Reset Slack authentication</a>
                 </div>
             </div>
         </div>
